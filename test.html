@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Widget Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #666;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .test-section ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .test-section li {
+            margin: 5px 0;
+            color: #555;
+        }
+    </style>
+    <!-- Load the built CSS -->
+    <link rel="stylesheet" href="./dist/assets/index-njA6hTd5.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Chat Widget Test Page</h1>
+        <p>This page is for testing the chat widget functionality. The chat widget should appear in the bottom-right corner.</p>
+        
+        <div class="test-section">
+            <h2>Test Scenarios</h2>
+            <ul>
+                <li><strong>Basic Chat:</strong> Click the chat button and send a message</li>
+                <li><strong>Reservation Flow:</strong> Send a message containing "sofa", "book", or "appointment" to trigger the reservation flow</li>
+                <li><strong>Calendar:</strong> Test date selection (weekends should be hidden, 5 days per row)</li>
+                <li><strong>Time Slots:</strong> Test time slot selection (some slots should be pre-picked in gray/orange, selected in yellow)</li>
+                <li><strong>User Details Form:</strong> Fill out and submit the reservation form</li>
+                <li><strong>Back Button:</strong> Test navigation back through the flow steps</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>Test Messages</h2>
+            <p>Try sending these messages to test different scenarios:</p>
+            <ul>
+                <li>"I want to see the sofa"</li>
+                <li>"Book an appointment"</li>
+                <li>"Can I reserve a time?"</li>
+                <li>"Hello" (for general chat)</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>Instructions</h2>
+            <p>To use this test file:</p>
+            <ol>
+                <li>Make sure you've run <code>npm run build</code> to build the project</li>
+                <li>Serve this HTML file using a local server (e.g., <code>python -m http.server</code> or <code>npx serve</code>)</li>
+                <li>Open the served URL in your browser</li>
+                <li>The chat widget should appear in the bottom-right corner</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Load the built JavaScript -->
+    <script type="module" src="./dist/assets/index-CGKWka6J.js"></script>
+</body>
+</html>

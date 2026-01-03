@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Base colors - Main background and text */
+    --background: 0 0% 100%; /* Main page background (white in light mode) */
+    --foreground: 0 0% 0%; /* Main text color (black in light mode) */
+    
+    /* Card colors - Used for card components */
+    --card: 0 0% 100%; /* Card background */
+    --card-foreground: 0 0% 0%; /* Card text color */
+    
+    /* Popover colors - Used for popover/dropdown components */
+    --popover: 0 0% 100%; /* Popover background */
+    --popover-foreground: 0 0% 0%; /* Popover text color */
+    
+    /* Primary colors - Main brand/accent color */
+    --primary: 116 35% 73%; /* Primary button/action color (light green) */
+    --primary-foreground: 0 0% 0%; /* Text on primary background */
+    
+    /* Secondary colors - Secondary actions */
+    --secondary: 28 61% 68%; /* Secondary button/action color (peach/orange) */
+    --secondary-foreground: 0 0% 0%; /* Text on secondary background */
+    
+    /* Muted colors - Subtle backgrounds and disabled states */
+    --muted: 116 20% 90%; /* Muted background (light gray-green) */
+    --muted-foreground: 0 0% 45.1%; /* Muted text color */
+    
+    /* Accent colors - Highlights and hover states */
+    --accent: 28 61% 68%; /* Accent color (peach/orange) */
+    --accent-foreground: 0 0% 0%; /* Text on accent background */
+    
+    /* Destructive colors - Error states, delete actions */
+    --destructive: 0 84.2% 60.2%; /* Destructive/error color (red) */
+    --destructive-foreground: 0 0% 98%; /* Text on destructive background */
+    
+    /* Border and input colors */
+    --border: 116 15% 85%; /* Border color (light gray-green) */
+    --input: 116 15% 85%; /* Input border color */
+    --ring: 116 35% 73%; /* Focus ring color (matches primary) */
+    
+    /* Border radius */
+    --radius: 0.5rem; /* Default border radius */
+    
+    /* Tertiary colors - Used for black/white buttons and borders */
+    --tertiary: 0 0% 0%; /* Tertiary background (black in light mode) */
+    --tertiary-foreground: 0 0% 100%; /* Text on tertiary background (white in light mode) */
+    
+    /* Status colors - Success, warning, info states */
+    --success: 142 76% 36%; /* Success/available state (green) - Used for calendar availability dots */
+    --success-foreground: 0 0% 100%; /* Text on success background */
+    --warning: 38 92% 50%; /* Warning/limited state (orange) - Used for calendar availability dots and time slot hover */
+    --warning-foreground: 0 0% 0%; /* Text on warning background */
+    --info: 199 89% 48%; /* Info state (blue) */
+    --info-foreground: 0 0% 100%; /* Text on info background */
+    
+    /* Gray scale - Neutral grays for various UI elements */
+    --gray-50: 0 0% 98%; /* Lightest gray - Used for subtle backgrounds and hover states */
+    --gray-100: 0 0% 96%; /* Very light gray - Used for calendar day hover states */
+    --gray-300: 0 0% 88%; /* Light gray - Used for disabled/picked time slots */
+    --gray-400: 0 0% 75%; /* Medium-light gray - Used for borders on disabled states */
+    --gray-600: 0 0% 45%; /* Medium gray - Used for text on disabled states */
+    --gray-800: 0 0% 25%; /* Dark gray - Used for chat widget button text */
+  }
+
+  .dark {
+    /* Base colors - Dark mode variants */
+    --background: 0 0% 0%; /* Main page background (black in dark mode) */
+    --foreground: 116 35% 73%; /* Main text color (light green in dark mode) */
+    
+    /* Card colors - Dark mode variants */
+    --card: 0 0% 5%; /* Card background (very dark gray) */
+    --card-foreground: 116 35% 73%; /* Card text color */
+    
+    /* Popover colors - Dark mode variants */
+    --popover: 0 0% 5%; /* Popover background */
+    --popover-foreground: 116 35% 73%; /* Popover text color */
+    
+    /* Primary colors - Dark mode variants */
+    --primary: 116 35% 73%; /* Primary color (same as light mode) */
+    --primary-foreground: 0 0% 0%; /* Text on primary background */
+    
+    /* Secondary colors - Dark mode variants */
+    --secondary: 28 61% 68%; /* Secondary color (same as light mode) */
+    --secondary-foreground: 0 0% 0%; /* Text on secondary background */
+    
+    /* Muted colors - Dark mode variants */
+    --muted: 0 0% 15%; /* Muted background (dark gray) */
+    --muted-foreground: 116 25% 65%; /* Muted text color */
+    
+    /* Accent colors - Dark mode variants */
+    --accent: 28 61% 68%; /* Accent color (same as light mode) */
+    --accent-foreground: 0 0% 0%; /* Text on accent background */
+    
+    /* Destructive colors - Dark mode variants */
+    --destructive: 0 62.8% 50%; /* Destructive color (darker red) */
+    --destructive-foreground: 0 0% 98%; /* Text on destructive background */
+    
+    /* Border and input colors - Dark mode variants */
+    --border: 0 0% 20%; /* Border color (dark gray) */
+    --input: 0 0% 20%; /* Input border color */
+    --ring: 116 35% 73%; /* Focus ring color */
+    
+    /* Tertiary colors - Dark mode variants (inverted from light mode) */
+    --tertiary: 0 0% 100%; /* Tertiary background (white in dark mode) */
+    --tertiary-foreground: 0 0% 0%; /* Text on tertiary background (black in dark mode) */
+    
+    /* Status colors - Same as light mode (status colors typically don't change) */
+    --success: 142 76% 36%; /* Success/available state (green) */
+    --success-foreground: 0 0% 100%; /* Text on success background */
+    --warning: 38 92% 50%; /* Warning/limited state (orange) */
+    --warning-foreground: 0 0% 0%; /* Text on warning background */
+    --info: 199 89% 48%; /* Info state (blue) */
+    --info-foreground: 0 0% 100%; /* Text on info background */
+    
+    /* Gray scale - Same as light mode (grays typically don't change) */
+    --gray-50: 0 0% 98%; /* Lightest gray */
+    --gray-100: 0 0% 96%; /* Very light gray */
+    --gray-300: 0 0% 88%; /* Light gray */
+    --gray-400: 0 0% 75%; /* Medium-light gray */
+    --gray-600: 0 0% 45%; /* Medium gray */
+    --gray-800: 0 0% 25%; /* Dark gray */
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+}
+
+@layer components {
+  /* Time slot picker - Disabled/picked state styling */
+  .time-slot-picked {
+    background-color: hsl(var(--gray-300)); /* Light gray background for unavailable slots */
+    color: hsl(var(--gray-600)); /* Medium gray text */
+    border-color: hsl(var(--gray-400)); /* Medium-light gray border */
+    cursor: not-allowed;
+  }
+  
+  /* Time slot picker - Hover state on picked slots */
+  .time-slot-picked:hover {
+    background-color: hsl(var(--warning)); /* Orange warning color on hover */
+    color: hsl(var(--warning-foreground)); /* Black text on warning background */
+    border-color: hsl(var(--warning)); /* Orange border */
+  }
+}

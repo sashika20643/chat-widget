@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Ebene_2" data-name="Ebene 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 51.44 50.48">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #439143;
+      }
+
+      .cls-1, .cls-2, .cls-3 {
+        stroke-miterlimit: 10;
+        stroke-width: 1.06px;
+      }
+
+      .cls-1, .cls-3 {
+        stroke: #000;
+      }
+
+      .cls-4 {
+        font-family: HelveticaNeue-Medium, 'Helvetica Neue';
+        font-size: 11.05px;
+        font-weight: 500;
+      }
+
+      .cls-4, .cls-3 {
+        fill: #fff;
+      }
+
+      .cls-2 {
+        fill: none;
+        stroke: #1d1d1b;
+      }
+    </style>
+  </defs>
+  <g id="Ebene_4" data-name="Ebene 4">
+    <circle class="cls-3" cx="28.92" cy="27.95" r="22"/>
+    <circle class="cls-1" cx="9.59" cy="9.59" r="9.07"/>
+    <text class="cls-4" transform="translate(6.52 13.39)"><tspan x="0" y="0">1</tspan></text>
+    <polygon class="cls-2" points="20.55 16.59 37.29 16.59 37.29 39.31 29.21 32.28 20.54 39.31 20.55 16.59"/>
+  </g>
+</svg>

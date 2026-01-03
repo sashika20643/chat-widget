@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Ebene_2" data-name="Ebene 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22.94 22.94">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #439143;
+        stroke: #000;
+        stroke-miterlimit: 10;
+        stroke-width: 1.3px;
+      }
+
+      .cls-2 {
+        fill: #fff;
+        font-family: HelveticaNeue-Medium, 'Helvetica Neue';
+        font-size: 13.19px;
+        font-weight: 500;
+      }
+    </style>
+  </defs>
+  <g id="Ebene_4" data-name="Ebene 4">
+    <circle class="cls-1" cx="11.47" cy="11.47" r="10.82"/>
+    <text class="cls-2" transform="translate(7.8 16)"><tspan x="0" y="0">1</tspan></text>
+  </g>
+</svg>

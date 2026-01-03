@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Ebene_2" data-name="Ebene 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 53.81 53.81">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #1d1d1b;
+      }
+
+      .cls-1, .cls-2 {
+        stroke-miterlimit: 10;
+        stroke-width: 1.3px;
+      }
+
+      .cls-2 {
+        fill: #fff;
+        stroke: #000;
+      }
+    </style>
+  </defs>
+  <g id="Ebene_4" data-name="Ebene 4">
+    <circle class="cls-2" cx="26.9" cy="26.9" r="26.25"/>
+    <polygon class="cls-1" points="16.92 13.34 36.9 13.34 36.9 40.46 27.25 32.08 16.91 40.46 16.92 13.34"/>
+  </g>
+</svg>

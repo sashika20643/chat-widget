@@ -1,0 +1,50 @@
+# React + TypeScript + Tailwind Coding Guidelines
+
+## Code Style & Structure
+- Write **concise, technical TypeScript code**.  
+- Use **functional and declarative programming patterns**; avoid classes.  
+- Prefer **iteration, modularization, and reusable utilities** over code duplication.  
+- Use **descriptive variable names** with auxiliary verbs, e.g., `isLoaded`, `hasError`.  
+- Structure files by purpose: exported **page/component (`.tsx`)**, **helpers/hooks (`.ts`)**, **static content**, **types**.
+
+## Naming Conventions
+- Favor **named exports** for components and utilities.  
+- Prefix **custom hooks** with `use` (e.g., `useSiteMetadata.ts`).  
+
+## TypeScript Usage
+- Use TypeScript for all code.  
+- Prefer **interfaces** over `type` for objects.  
+- Avoid `any` and `unknown` unless absolutely necessary; rely on proper type definitions.  
+- Avoid type assertions using `as` or `!`.  
+- Use **objects/maps** instead of enums for flexibility.  
+
+## Syntax & Formatting
+- Use the **`function` keyword** for pure functions.  
+- Prefer **concise conditionals** for simple statements; avoid unnecessary braces.  
+- Keep **TSX minimal and declarative**.  
+- Modularize TSX into **small, reusable components** when logic grows.  
+
+## UI & Styling
+- Use **Tailwind CSS** for utility-first styling.  
+- Use **shadcn/ui** for prebuilt, customizable React components.  
+- Follow a **mobile-first responsive approach**.  
+- Use **semantic HTML** whenever possible for accessibility.  
+
+## State Management
+- Use **React-Redux** for application-level state.  
+- Use **Redux Toolkit** for slices, reducers, and store configuration.  
+- Keep state **minimal, localized, and structured**; lift state only when necessary.  
+- Use **selectors and memoization** to prevent unnecessary re-renders.  
+
+## Data Fetching & API
+- Use **React Query, SWR, or hooks** for client-side data fetching.  
+- Keep **data fetching separate** from presentation components.  
+- Handle loading, error, and empty states explicitly with **boolean flags**.  
+
+## Performance & Best Practices
+- Optimize rendering using **memoization** (`React.memo`, `useMemo`, `useCallback`) where needed.  
+- Use shadcn components mainly without writing custom css. write custom when its only neccery.
+- Use forwardRef if its needed only.
+- Avoid unnecessary re-renders and heavy computations in TSX.  
+- Split large components into smaller **pure components**.  
+- Write **reusable, composable components and hooks** wherever possible.  
