@@ -9,6 +9,9 @@ import ChatWidgetButton from '@/components/ChatWidgetButton'
 import ChatInputBar from '@/components/ChatInputBar'
 import ReservationFlow from '@/components/flows/ReservationFlow'
 import { detectScenario, getAvailableTimeSlots, submitReservation } from '@/services/chatApi'
+import { createCalendarEvent } from '@/services/calendarApi'
+import { useAppDispatch } from '@/store/hooks'
+import { fetchCalendarEventsAsync } from '@/store/slices/calendarEventsSlice'
 import H100Icon from '@/assets/icons/H100 AI ICON.svg'
 import HelpIcon from '@/assets/icons/Help Icon.svg'
 import BookmarkCleanIcon from '@/assets/icons/Bookmark Clean Icon.svg'
@@ -37,6 +40,7 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
   const [reservationData, setReservationData] = useState<ReservationData>({})
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const dispatch = useAppDispatch()
 
   useImperativeHandle(ref, () => ({
     setIsOpen,
@@ -100,6 +104,20 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
 
   function handleButtonClick(action: string) {
     if (action === 'book_an_appointment') {
+      console.log('[ChatWidget] Appointment button clicked, fetching calendar events')
+      
+      // Fetch calendar events for the next 2 months
+      const today = new Date()
+      const startDate = new Date(today.getFullYear(), today.getMonth(), 1)
+      const endDate = new Date(today.getFullYear(), today.getMonth() + 2, 0, 23, 59, 59)
+      
+      const startDateISO = startDate.toISOString()
+      const endDateISO = endDate.toISOString()
+      
+      console.log('[ChatWidget] Date range:', { startDate: startDateISO, endDate: endDateISO })
+      
+      dispatch(fetchCalendarEventsAsync({ startDate: startDateISO, endDate: endDateISO }))
+      
       setFlow({
         state: 'reservation_flow',
         step: 'select_date'
@@ -123,6 +141,62 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
 
   async function handleFormSubmit(details: ReservationData['userDetails']) {
     if (!details || !reservationData.selectedDate || !reservationData.selectedTime) return
+
+    try {
+      // Convert selected date and UTC time to ISO format for calendar event
+      // selectedTime is stored in UTC format (HH:mm)
+      const selectedDate = reservationData.selectedDate
+      const [utcHours, utcMinutes] = reservationData.selectedTime.split(':').map(Number)
+      
+      // Get date components from selectedDate
+      const year = selectedDate.getFullYear()
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0')
+      const day = String(selectedDate.getDate()).padStart(2, '0')
+      
+      // Create start time in UTC ISO format
+      const startTimeISO = `${year}-${month}-${day}T${String(utcHours).padStart(2, '0')}:${String(utcMinutes).padStart(2, '0')}:00+00:00`
+      
+      // Create end time (1 hour after start time)
+      const endDate = new Date(`${year}-${month}-${day}T${String(utcHours).padStart(2, '0')}:${String(utcMinutes).padStart(2, '0')}:00Z`)
+      endDate.setUTCHours(endDate.getUTCHours() + 1)
+      
+      const endYear = endDate.getUTCFullYear()
+      const endMonth = String(endDate.getUTCMonth() + 1).padStart(2, '0')
+      const endDay = String(endDate.getUTCDate()).padStart(2, '0')
+      const endHours = String(endDate.getUTCHours()).padStart(2, '0')
+      const endMinutes = String(endDate.getUTCMinutes()).padStart(2, '0')
+      const endTimeISO = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}:00+00:00`
+
+      console.log('[ChatWidget] Creating calendar event:', {
+        start_time: startTimeISO,
+        end_time: endTimeISO,
+        attendee: details.email
+      })
+
+      // Create calendar event
+      await createCalendarEvent({
+        subject: `Appointment with ${details.name}-test`,
+        content: `Appointment booking for ${details.name}-test`,
+        start_time: startTimeISO,
+        end_time: endTimeISO,
+        location: 'Showroom',
+        attendees: [
+          {
+            email: details.email,
+            name: details.name,
+            type: 'required' as const
+          }
+        ],
+        is_online_meeting: false,
+        is_reminder_on: true,
+        reminder_minutes_before_start: 15
+      })
+
+      console.log('[ChatWidget] Calendar event created successfully')
+    } catch (error) {
+      console.error('[ChatWidget] Error creating calendar event:', error)
+      // Continue with reservation submission even if calendar event creation fails
+    }
 
     const result = await submitReservation({
       date: reservationData.selectedDate,

@@ -45,7 +45,7 @@ export async function getAvailableTimeSlots(_date: Date): Promise<{
   return new Promise((resolve) => {
     setTimeout(() => {
       const allSlots = [
-        '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00'
+        '08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00'
       ]
       
       // Randomly mark some slots as picked (from database)

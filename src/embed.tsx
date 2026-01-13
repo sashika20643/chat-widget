@@ -1,14 +1,17 @@
 import React, { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { Provider } from 'react-redux'
 import type { Root } from 'react-dom/client'
 import ChatWidget from '@/components/ChatWidget'
 import type { ChatWidgetRef } from '@/components/ChatWidget'
+import { store } from '@/store'
 import '@/styles/index.css'
 
 interface ChatbotConfig {
   id?: number
   name?: string
   price?: number
+  apiUrl?: string // Optional API URL override
   [key: string]: unknown
 }
 
@@ -42,11 +45,13 @@ class ChatbotController {
 
     this.root.render(
       <StrictMode>
-        <WidgetWithRef
-          ref={(ref) => {
-            this.widgetRef = ref
-          }}
-        />
+        <Provider store={store}>
+          <WidgetWithRef
+            ref={(ref) => {
+              this.widgetRef = ref
+            }}
+          />
+        </Provider>
       </StrictMode>
     )
 
@@ -61,6 +66,10 @@ class ChatbotController {
       // Store config for use in the widget if needed
       if (config && typeof window !== 'undefined') {
         ;(window as typeof window & { chatbotConfig?: ChatbotConfig }).chatbotConfig = config
+        // Set API URL if provided
+        if (config.apiUrl) {
+          ;(window as typeof window & { chatbotApiUrl?: string }).chatbotApiUrl = config.apiUrl
+        }
       }
     }
   }
@@ -85,6 +94,26 @@ class ChatbotController {
 // Expose global API
 if (typeof window !== 'undefined') {
   const chatbot = new ChatbotController()
+  
+  // Check for API URL configuration from script tag data attribute
+  function getApiUrlFromScriptTag(): string | null {
+    const scripts = document.getElementsByTagName('script')
+    for (let i = 0; i < scripts.length; i++) {
+      const script = scripts[i]
+      const apiUrl = script.getAttribute('data-api-url')
+      if (apiUrl) {
+        return apiUrl
+      }
+    }
+    return null
+  }
+  
+  // Initialize API URL from script tag if available
+  const scriptApiUrl = getApiUrlFromScriptTag()
+  if (scriptApiUrl) {
+    ;(window as typeof window & { chatbotApiUrl?: string }).chatbotApiUrl = scriptApiUrl
+    console.log('[Chatbot] API URL configured from script tag:', scriptApiUrl)
+  }
   
   // Wait for DOM to be ready
   function initialize() {

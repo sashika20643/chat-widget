@@ -25,12 +25,18 @@ function CustomDayButton({
 
   const dayName = day.date.toLocaleDateString('en-US', { weekday: 'short' }).substring(0, 2).toUpperCase()
   const dayNumber = day.date.getDate()
-  const dateKey = day.date.toISOString().split('T')[0] // YYYY-MM-DD format
+  // Use local date to match calendar display, format as YYYY-MM-DD
+  const year = day.date.getFullYear()
+  const month = String(day.date.getMonth() + 1).padStart(2, '0')
+  const date = String(day.date.getDate()).padStart(2, '0')
+  const dateKey = `${year}-${month}-${date}` // YYYY-MM-DD format in local timezone
   
   // Check availability from map
+  // undefined or not in map = no bookings = green (available)
+  // false = has bookings = yellow (unavailable)
   const availability = availabilityMap?.get(dateKey)
-  const isAvailable = availability === true
-  const showDot = !modifiers.disabled && availability !== undefined
+  const hasBookings = availability === false // false means has bookings
+  const showDot = !modifiers.disabled // Show dot for all enabled dates
   
   return (
     <Button
@@ -73,7 +79,7 @@ function CustomDayButton({
       {showDot && (
         <div className={cn(
           "absolute bottom-0.5 left-0.5 sm:bottom-1 sm:left-1 w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full",
-          isAvailable ? "bg-[hsl(var(--success))]" : "bg-[hsl(var(--warning))]"
+          hasBookings ? "bg-[hsl(var(--warning))]" : "bg-[hsl(var(--success))]" // Yellow if has bookings, green if no bookings
         )} />
       )}
     </Button>

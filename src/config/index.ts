@@ -1,7 +1,6 @@
 // Application configuration
-// Export your config constants here
+// Export your config values here
 
 export const config = {
-  // Add your config values here
+  apiBaseUrl: 'https://getagent-email-agent-server.ceilu9.easypanel.host',
 }
-
