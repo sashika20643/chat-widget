@@ -17,11 +17,14 @@ import H100Icon from '@/assets/icons/H100 AI ICON.svg'
 import HelpIcon from '@/assets/icons/Help Icon.svg'
 import BookmarkCleanIcon from '@/assets/icons/Bookmark Clean Icon.svg'
 import CollapsIcon from '@/assets/icons/Collaps Icon.svg'
-import type { Message as MessageType, ChatWidgetProps, ConversationFlow, ReservationData, ReservationStep } from '@/types/chat'
+import InactivitySuggestionNotification from '@/components/InactivitySuggestionNotification'
+import type { Message as MessageType, ChatWidgetProps, ConversationFlow, ReservationData, ReservationStep, WidgetAction } from '@/types/chat'
 
 export interface ChatWidgetRef {
   setIsOpen: (open: boolean) => void
   startBookingFlow: () => void
+  /** Start a flow by action (e.g. from URL param action=booking). */
+  startFlow: (action: WidgetAction) => void
 }
 
 const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({ 
@@ -34,12 +37,37 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
   const [flow, setFlow] = useState<ConversationFlow>({ state: 'idle' })
   const [reservationData, setReservationData] = useState<ReservationData>({})
   const [isLoading, setIsLoading] = useState(false)
+  const [showInactivitySuggestion, setShowInactivitySuggestion] = useState(false)
+  const [isDesktopForNotification, setIsDesktopForNotification] = useState(
+    typeof window !== 'undefined' && window.matchMedia('(min-width: 640px)').matches
+  )
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const mainContentElRef = useRef<Element | null>(null)
   const dispatch = useAppDispatch()
+
+  const DESKTOP_BREAKPOINT_PX = 1500
+  const NOTIFICATION_DESKTOP_BREAKPOINT_PX = 640
+  const MAIN_CONTENT_SELECTORS = ['main', '#content', '[role="main"]', '.main-content', '.content', 'article']
+
+  function findHostMainContent(): HTMLElement | null {
+    const container = document.getElementById('chatbot-widget-container')
+    for (const sel of MAIN_CONTENT_SELECTORS) {
+      const el = document.querySelector(sel)
+      if (el && el !== container && !container?.contains(el)) return el as HTMLElement
+    }
+    // Fallback: first direct child of body that isn't the widget (e.g. .container wrapper)
+    const first = document.body?.firstElementChild
+    if (first && first !== container && first.id !== 'chatbot-widget-container') return first as HTMLElement
+    return null
+  }
 
   useImperativeHandle(ref, () => ({
     setIsOpen,
     startBookingFlow,
+    startFlow(action: WidgetAction) {
+      if (action === 'booking') startBookingFlow()
+      // 'chat' = just open, no specific flow
+    },
   }))
 
   // Auto-scroll to bottom when messages or flow changes
@@ -49,8 +77,77 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
     }
   }, [messages, flow.state, flow.step])
 
+  // Listen for inactivity notification (30 seconds no events on host page)
+  useEffect(() => {
+    const handler = () => setShowInactivitySuggestion(true)
+    window.addEventListener('chat-widget-inactivity', handler)
+    return () => window.removeEventListener('chat-widget-inactivity', handler)
+  }, [])
+
+  // Desktop vs mobile for notification (640px breakpoint)
+  useEffect(() => {
+    const mql = window.matchMedia(`(min-width: ${NOTIFICATION_DESKTOP_BREAKPOINT_PX}px)`)
+    const handler = () => setIsDesktopForNotification(mql.matches)
+    handler()
+    mql.addEventListener('change', handler)
+    return () => mql.removeEventListener('change', handler)
+  }, [])
+
+  // Sync open state to body and optionally shrink host main content (side-by-side on desktop)
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    const isDesktop = () => window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT_PX}px)`).matches
+
+    if (isOpen) {
+      document.body.setAttribute('data-chat-open', 'true')
+      window.dispatchEvent(new CustomEvent('chat-widget-open'))
+
+      if (isDesktop()) {
+        const candidate = findHostMainContent()
+        if (candidate) {
+          candidate.classList.add('chat-widget-main-shrink')
+          mainContentElRef.current = candidate
+        }
+      }
+    } else {
+      document.body.removeAttribute('data-chat-open')
+      window.dispatchEvent(new CustomEvent('chat-widget-close'))
+      if (mainContentElRef.current) {
+        mainContentElRef.current.classList.remove('chat-widget-main-shrink')
+        mainContentElRef.current = null
+      }
+    }
+
+    const mql = window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT_PX}px)`)
+    const handleChange = () => {
+      if (!isOpen) return
+      if (!mql.matches && mainContentElRef.current) {
+        mainContentElRef.current.classList.remove('chat-widget-main-shrink')
+        mainContentElRef.current = null
+      }
+      if (mql.matches && !mainContentElRef.current) {
+        const candidate = findHostMainContent()
+        if (candidate) {
+          candidate.classList.add('chat-widget-main-shrink')
+          mainContentElRef.current = candidate
+        }
+      }
+    }
+    mql.addEventListener('change', handleChange)
+
+    return () => {
+      document.body.removeAttribute('data-chat-open')
+      if (mainContentElRef.current) {
+        mainContentElRef.current.classList.remove('chat-widget-main-shrink')
+        mainContentElRef.current = null
+      }
+      mql.removeEventListener('change', handleChange)
+    }
+  }, [isOpen])
+
   async function handleSend() {
     if (!inputValue.trim()) return
+    setShowInactivitySuggestion(false)
 
     const userMessage: MessageType = {
       id: Date.now().toString(),
@@ -82,7 +179,7 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
     }
   }
 
-  function handleKeyPress(event: React.KeyboardEvent<HTMLInputElement>) {
+  function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
       handleSend()
@@ -286,22 +383,50 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
     }
   }
 
-  if (!isOpen) {
-    return <ChatWidgetButton onOpen={handleOpen} />
+  const handleInactivityDismiss = () => setShowInactivitySuggestion(false)
+  const handleInactivityAction = () => {
+    setShowInactivitySuggestion(false)
+    setIsOpen(true)
   }
-  
+
+  if (!isOpen) {
+    return (
+      <>
+        {showInactivitySuggestion && isDesktopForNotification && (
+          <InactivitySuggestionNotification
+            visible
+            variant="desktop"
+            onDismiss={handleInactivityDismiss}
+            onAction={handleInactivityAction}
+          />
+        )}
+        <ChatWidgetButton onOpen={handleOpen} />
+      </>
+    )
+  }
 
   return (
+    <>
+      {showInactivitySuggestion && isDesktopForNotification && (
+        <InactivitySuggestionNotification
+          visible
+          variant="desktop"
+          onDismiss={handleInactivityDismiss}
+          onAction={handleInactivityAction}
+        />
+      )}
     <Card className={cn(
       "fixed z-50 flex flex-col shadow-2xl border-2 border-black sm:border-2 sm:border-muted",
       // Mobile (<640px): Full width overlay, slides from bottom
       "bottom-0 left-0 right-0 w-full h-[calc(100vh-2rem)] max-h-[calc(100vh-2rem)]",
       "animate-in slide-in-from-bottom duration-300",
-      // sm (≥640px): Fixed position bottom-right corner
-      "sm:bottom-4 sm:left-auto sm:right-4 sm:w-[30rem] sm:h-[800px] sm:max-h-[85%] sm:rounded-lg"
+      // sm (≥640px): Fixed position bottom-right corner (popup)
+      "sm:bottom-4 sm:left-auto sm:right-4 sm:w-[30rem] sm:h-[800px] sm:max-h-[85%] sm:rounded-lg",
+      // ≥1500px: Full-height right sidebar so host can shrink main panel via body[data-chat-open]
+      "min-[1500px]:right-0 min-[1500px]:bottom-0 min-[1500px]:top-0 min-[1500px]:h-screen min-[1500px]:w-[28rem] min-[1500px]:max-h-none min-[1500px]:rounded-l-lg"
     )}>
       {/* Header */}
-      <div className="flex items-center justify-between p-3 sm:p-4 border-b flex-shrink-0">
+      <div className="flex items-center justify-between p-3 sm:p-4  flex-shrink-0">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {flow.state === 'reservation_flow' && flow.step ? (
             <IconButton
@@ -361,7 +486,15 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
         <WelcomeScreen onTagClick={handleTagClick} />
       ) : (
         <ScrollArea className="flex-1 min-h-0">
-          <div className="p-3 sm:p-4 space-y-4 min-w-0 overflow-visible">
+          <div className="p-3 sm:p-4 space-y-4 min-w-0 overflow-visible relative">
+            {/* Gradient shadow at top of messages (sticky) */}
+            <div
+              className="sticky top-0 -mt-3 -mx-4 pt-0 px-4 h-6 flex-shrink-0 pointer-events-none z-10"
+              style={{
+                background: 'linear-gradient(rgb(141 136 136 / 50%) 0%, rgb(214 207 207 / 20%) 35%, rgb(255 255 255 / 5%) 70%, #00000000 40%)',
+              }}
+
+            />
             {messages.map((message) => (
                 <Message 
                   key={message.id} 
@@ -380,15 +513,28 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
         </ScrollArea>
       )}
 
+      {/* Inactivity suggestion (mobile: in bottom panel) */}
+      {showInactivitySuggestion && !isDesktopForNotification && (
+        <div className="flex-shrink-0 px-3 pb-1 sm:px-4">
+          <InactivitySuggestionNotification
+            visible
+            variant="mobile"
+            onDismiss={handleInactivityDismiss}
+            onAction={handleInactivityAction}
+          />
+        </div>
+      )}
+
       {/* Input Area */}
       <ChatInputBar
             value={inputValue}
         onChange={setInputValue}
         onSend={handleSend}
         placeholder={placeholder}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
       />
     </Card>
+    </>
   )
 })
 

@@ -46,6 +46,28 @@ function Message({ message, onButtonClick }: MessageProps) {
           </div>
         )}
 
+        {/* Product cards: small grid with hyperlinks */}
+        {content.productCards && content.productCards.length > 0 && (
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {content.productCards.map((card, index) => (
+              <a
+                key={index}
+                href={card.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block rounded-md overflow-hidden border border-black/10 bg-muted hover:border-black/25 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                title={card.title}
+              >
+                <img
+                  src={card.src}
+                  alt={card.alt || card.title || `Product ${index + 1}`}
+                  className="w-full aspect-square object-cover"
+                />
+              </a>
+            ))}
+          </div>
+        )}
+
         {/* Buttons */}
         {content.buttons && content.buttons.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">

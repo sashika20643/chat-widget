@@ -60,7 +60,9 @@ function CustomDayButton({
         "data-[range-middle=true]:bg-accent data-[range-middle=true]:text-accent-foreground",
         "data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground",
         "data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground",
-        "hover:bg-[hsl(var(--gray-100))] disabled:opacity-50 disabled:cursor-not-allowed",
+        "hover:bg-[hsl(var(--gray-100))] disabled:cursor-not-allowed",
+        modifiers.disabled && "bg-muted/70 text-muted-foreground border-muted-foreground/25 opacity-90",
+        modifiers.today && !modifiers.selected && "ring-2 ring-primary border-primary/60 bg-primary/10",
         className
       )}
       {...props}

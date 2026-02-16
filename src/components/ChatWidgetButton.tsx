@@ -20,7 +20,7 @@ function ChatWidgetButton({ onOpen }: ChatWidgetButtonProps) {
 
       {/* Chat Bubble */}
       <div className="flex items-center gap-2 sm:gap-3 bg-background px-3 sm:px-4 py-2 sm:py-3 rounded-full shadow-lg border border-black">
-        <span className="text-xs sm:text-base font-medium text-[hsl(var(--gray-800))] max-w-[200px] sm:max-w-[280px]">
+        <span className="text-xs sm:text-base  text-black max-w-[200px] sm:max-w-[280px]">
           Hi, I am your personal H100 furniture consultant.
         </span>
         <IconButton

@@ -9,9 +9,18 @@ export interface MessageImage {
   alt?: string
 }
 
+export interface MessageProductCard {
+  src: string
+  alt?: string
+  href: string
+  title?: string
+}
+
 export interface MessageContent {
   text?: string
   images?: MessageImage[]
+  /** Product image cards in a grid (image + hyperlink) */
+  productCards?: MessageProductCard[]
   buttons?: MessageButton[]
 }
 
@@ -58,6 +67,9 @@ export interface ScenarioResponse {
   message: MessageContent
   flow?: ConversationFlow
 }
+
+/** URL param `action` values that trigger different widget flows */
+export type WidgetAction = 'booking' | 'chat'
 
 export interface ChatWidgetProps {
   title?: string

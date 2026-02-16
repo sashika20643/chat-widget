@@ -262,3 +262,11 @@
     border-color: hsl(var(--warning)); /* Orange border */
   }
 }
+
+/* Host page: shrink main content when chat is open on desktop (side-by-side) */
+@media (min-width: 1500px) {
+  body[data-chat-open] .chat-widget-main-shrink {
+    width: calc(100% - 28rem);
+    max-width: calc(100% - 28rem);
+  }
+}

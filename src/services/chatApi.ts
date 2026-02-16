@@ -41,6 +41,22 @@ export async function detectScenario(message: string): Promise<ScenarioResponse>
             text: "H100 is a premium furniture brand offering high-quality, stylish furniture pieces. We specialize in creating beautiful, functional spaces with our curated collection of furniture. How can I help you learn more?"
           }
         })
+      } else if (lowerMessage.includes('similar')) {
+        // Similar designer objects – text + product image cards grid with hyperlinks
+        resolve({
+          scenario: null,
+          message: {
+            text: "Okay super, Yannic ist informiert er wird gleich bei dir sein :). in der zwischenzeit habe ich dir noch ein paar ähnliche Designer Objekte:",
+            productCards: [
+              { src: "https://www.bogen33.ch/photo/data/beistelltisch-caruelle-nussbaum-vintage-georges-u-caruelle-embru-lounge-tisch-tisch-526-110659-2.jpg?ts=1765812414", alt: "Beistelltisch Caruelle", href: "https://www.bogen33.ch/", title: "Beistelltisch Caruelle Nussbaum" },
+              { src: "https://www.bogen33.ch/photo/data/beistelltisch-caruelle-nussbaum-vintage-georges-u-caruelle-embru-lounge-tisch-tisch-382-110657-2.jpg?ts=1765812414", alt: "Caruelle Tisch Ansicht 2", href: "https://www.bogen33.ch/", title: "Caruelle Tisch" },
+              { src: "https://www.bogen33.ch/photo/data/beistelltisch-caruelle-nussbaum-vintage-georges-u-caruelle-embru-lounge-tisch-tisch-665-110662-2.jpg?ts=1765812414", alt: "Caruelle Tisch Ansicht 3", href: "https://www.bogen33.ch/", title: "Caruelle Tisch" },
+              { src: "https://www.bogen33.ch/photo/data/beistelltisch-caruelle-nussbaum-vintage-georges-u-caruelle-embru-lounge-tisch-tisch-798-110666-2.jpg?ts=1765812414", alt: "Caruelle Tisch Ansicht 4", href: "https://www.bogen33.ch/", title: "Caruelle Tisch" },
+              { src: "https://placehold.co/200x200/eee/333?text=Designer+1", alt: "Designer Objekt", href: "https://www.bogen33.ch/", title: "Designer Objekt" },
+              { src: "https://placehold.co/200x200/eee/333?text=Designer+2", alt: "Designer Objekt", href: "https://www.bogen33.ch/", title: "Designer Objekt" },
+            ]
+          }
+        })
       } else {
         // Default response
         resolve({

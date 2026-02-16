@@ -8,6 +8,7 @@ import { store } from '@/store'
 import { ParentEventTracker } from '@/utils/parentEventTracker'
 import { Toaster } from '@/components/ui/shadCN/toaster-embed'
 import { toast } from 'sonner'
+import type { WidgetAction } from '@/types/chat'
 import '@/styles/index.css'
 
 interface ChatbotConfig {
@@ -29,7 +30,7 @@ class ChatbotController {
   private widgetRef: ChatWidgetRef | null = null
   private isInitialized = false
   private isOpenState = false
-  private hasAppliedInitialChatOption = false
+  private hasAppliedInitialAction = false
   private eventTracker: ParentEventTracker | null = null
   private lastClickToastTime = 0
   private lastScrollToastTime = 0
@@ -64,8 +65,8 @@ class ChatbotController {
             ref={(ref) => {
               console.log('[Chatbot] Widget ref set:', !!ref)
               this.widgetRef = ref
-              // Once the ref is available, (re)apply initial chat option logic
-              this.applyInitialChatOption()
+              // Once the ref is available, (re)apply initial action from URL
+              this.applyInitialAction()
             }}
           />
         </Provider>
@@ -107,17 +108,16 @@ class ChatbotController {
           })
         }
       },
-      onUserInactive: (inactiveDuration) => {
-        const minutes = Math.round(inactiveDuration / 60000)
-        console.log(`[Chatbot] User inactive for ${minutes} minutes`)
-        toast.warning('You\'ve been inactive', {
-          description: `You haven't interacted with the page for ${minutes} minute${minutes > 1 ? 's' : ''}. Need help?`,
-          duration: 5000,
-        })
+      onUserInactive: () => {
+        console.log('[Chatbot] Main site inactive for 30 seconds — dispatching suggestion notification')
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('chat-widget-inactivity'))
+          console.log('[Chatbot] Event dispatched: chat-widget-inactivity')
+        }
       }
     })
 
-    this.eventTracker.setInactivityThreshold(2) // 2 minutes
+    this.eventTracker.setInactivityThreshold(0.5) // 30 seconds
     this.eventTracker.startTracking()
   }
 
@@ -145,22 +145,28 @@ class ChatbotController {
     this.widgetRef = null
   }
 
-  private applyInitialChatOption() {
+  private applyInitialAction() {
     if (typeof window === "undefined") return
-    if (this.hasAppliedInitialChatOption) return
+    if (this.hasAppliedInitialAction) return
 
     const params = new URLSearchParams(window.location.search)
-    const chatOption = params.get("chatOption")
+    const action = params.get("action") as WidgetAction | null
 
-    console.log('[Chatbot] applyInitialChatOption - chatOption:', chatOption, 'widgetRef set:', !!this.widgetRef)
+    console.log('[Chatbot] applyInitialAction - action:', action, 'widgetRef set:', !!this.widgetRef)
 
-    if (chatOption === "booking" && this.widgetRef) {
-      console.log('[Chatbot] applyInitialChatOption - opening widget and starting booking flow')
-      this.widgetRef.setIsOpen(true)
-      this.widgetRef.startBookingFlow()
-      this.isOpenState = true
-      this.hasAppliedInitialChatOption = true
+    if (!action || !this.widgetRef) return
+
+    const validActions: WidgetAction[] = ['booking', 'chat']
+    if (!validActions.includes(action)) {
+      console.log('[Chatbot] Unknown action:', action, '- ignoring')
+      return
     }
+
+    console.log('[Chatbot] applyInitialAction - opening widget and starting flow:', action)
+    this.widgetRef.setIsOpen(true)
+    this.isOpenState = true
+    this.widgetRef.startFlow(action)
+    this.hasAppliedInitialAction = true
   }
 
   open(config?: ChatbotConfig) {
@@ -170,8 +176,8 @@ class ChatbotController {
       this.widgetRef.setIsOpen(true)
       this.isOpenState = true
 
-      // Apply initial behavior (e.g., auto-start booking flow)
-      this.applyInitialChatOption()
+      // Apply initial behavior based on URL action param
+      this.applyInitialAction()
       // Store config for use in the widget if needed
       if (config && typeof window !== 'undefined') {
         ;(window as typeof window & { chatbotConfig?: ChatbotConfig }).chatbotConfig = config
@@ -244,13 +250,12 @@ if (typeof window !== 'undefined') {
   // Start initialization
   initialize()
 
-  // If URL has chatOption=booking, auto-open and jump to booking flow
+  // If URL has action=..., auto-open and run the corresponding flow
   if (typeof window !== 'undefined') {
-    console.log('[Chatbot] Checking URL for initial chatOption')
     const params = new URLSearchParams(window.location.search)
-    const chatOption = params.get('chatOption')
-    if (chatOption === 'booking') {
-      console.log('[Chatbot] chatOption=booking detected, calling open()')
+    const action = params.get('action')
+    if (action === 'booking' || action === 'chat') {
+      console.log('[Chatbot] action=' + action + ' detected, calling open()')
       chatbot.open()
     }
   }
