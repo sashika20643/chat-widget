@@ -1,66 +1,87 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/shadCN/button'
 import { Input } from '@/components/ui/shadCN/input'
+import { ChatBubble } from '@/components/ui/chat-bubble'
+import { cn } from '@/utils/utils'
 
 interface UserDetailsFormProps {
-  onSubmit: (details: { name: string; email: string; phone: string }) => void
+  onSubmit: (details: { firstName: string; lastName: string; email: string; phone: string; message?: string }) => void
 }
 
 function UserDetailsForm({ onSubmit }: UserDetailsFormProps) {
-  const [name, setName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
+  const [message, setMessage] = useState('')
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (name && email && phone) {
-      onSubmit({ name, email, phone })
+    if (firstName && lastName && email && phone) {
+      onSubmit({ firstName, lastName, email, phone, message: message || undefined })
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-background border border-[hsl(var(--tertiary))] rounded-lg p-4 space-y-3">
-      <h3 className="font-semibold text-sm mb-3">Please provide your details</h3>
+    <form onSubmit={handleSubmit} className="w-full">
+      <ChatBubble variant="assistant" className="p-4">
+      <p className="text-sm sm:text-base text-foreground mb-4">
+        Now we just need your contact details. We will only use your data to communicate about the appointment :)
+      </p>
       
-      <div>
-        <label className="text-xs text-muted-foreground mb-1 block">Name</label>
-        <Input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Your name"
-          required
-          className="text-sm"
-        />
-      </div>
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <Input
+            type="text"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="First name"
+            required
+            className="text-base text-foreground"
+          />
 
-      <div>
-        <label className="text-xs text-muted-foreground mb-1 block">Email</label>
+          <Input
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="Last name"
+            required
+            className="text-base text-foreground"
+          />
+        </div>
+
         <Input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="your.email@example.com"
+          placeholder="Email"
           required
-          className="text-sm"
+          className="text-base text-foreground"
         />
-      </div>
 
-      <div>
-        <label className="text-xs text-muted-foreground mb-1 block">Phone</label>
         <Input
           type="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          placeholder="+1 234 567 8900"
+          placeholder="Phone number"
           required
-          className="text-sm"
+          className="text-base text-foreground"
+        />
+
+        <textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Message (optional)"
+          className={cn(
+            "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+          )}
         />
       </div>
 
-      <Button type="submit" variant="black" className="w-full" disabled={!name || !email || !phone}>
+      <Button type="submit" variant="black" size="sm" className=" mt-4" disabled={!firstName || !lastName || !email || !phone}>
         Confirm Appointment
       </Button>
+      </ChatBubble>
     </form>
   )
 }

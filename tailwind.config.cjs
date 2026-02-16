@@ -7,6 +7,12 @@ module.exports = {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			sans: ['Helvetica Now', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+  		},
+  		screens: {
+  			'desktop': '1500px',
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',

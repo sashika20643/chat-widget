@@ -155,7 +155,7 @@ function CalendarPicker({ onDateSelect, minDate, availabilityMap }: CalendarPick
   const currentYear = today.getFullYear()
 
   return (
-    <div className="bg-background border border-[hsl(var(--tertiary))] rounded-lg p-1 sm:p-4 lg:p-6 w-[calc(100%-.5rem)] lg:w-[calc(100%)] md:w-[calc(100%)]">
+    <div className="p-1 sm:p-4 lg:p-6 w-[calc(100%-.5rem)] lg:w-[calc(100%)] md:w-[calc(100%)]">
       <Calendar
         mode="single"
         selected={selectedDate}

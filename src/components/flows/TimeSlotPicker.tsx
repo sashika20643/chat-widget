@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/shadCN/button'
+import { ChatBubble } from '@/components/ui/chat-bubble'
 import { cn } from '@/utils/utils'
 
 interface TimeSlotPickerProps {
@@ -10,9 +11,12 @@ interface TimeSlotPickerProps {
 
 function TimeSlotPicker({ slots, pickedSlots = [], selectedTime, onTimeSelect }: TimeSlotPickerProps) {
   return (
-    <div className="bg-background border border-[hsl(var(--tertiary))] rounded-lg p-4">
-      <h3 className="font-semibold text-sm mb-3">Select a time slot</h3>
-      <div className="grid grid-cols-3 gap-2">
+    <ChatBubble variant="assistant" className="p-4">
+      <span className="font-medium text-base mb-5 block">Sure, Thursday, September 19 
+works very well, we'll have plenty 
+of time for you then! What time 
+suits you best?</span>
+      <div className="grid grid-cols-4 gap-2">
         {slots.map((slot) => {
           const isSelected = selectedTime === slot
           const isPicked = pickedSlots.includes(slot)
@@ -20,14 +24,15 @@ function TimeSlotPicker({ slots, pickedSlots = [], selectedTime, onTimeSelect }:
           return (
             <Button
               key={slot}
-              variant={isSelected ? 'default' : 'outline'}
+              variant={isSelected ? 'default' : isPicked ? 'outline' : 'outline-black'}
               size="sm"
               onClick={() => !isPicked && onTimeSelect(slot)}
               disabled={isPicked}
               className={cn(
-                "text-xs",
-                !isPicked && " hover:bg-primary text-foreground border-primary",
-                isPicked && "time-slot-picked bg-secondary" 
+                "text-xs rounded-full max-w-[100px]",
+                !isPicked && !isSelected && "bg-[hsl(var(--primary))] text-primary-foreground hover:bg-[hsl(var(--primary))]/90",
+                isSelected && "bg-primary text-primary-foreground",
+                isPicked && "time-slot-picked bg-secondary text-primary-foreground" 
               )}
             >
               {slot}
@@ -35,7 +40,7 @@ function TimeSlotPicker({ slots, pickedSlots = [], selectedTime, onTimeSelect }:
           )
         })}
       </div>
-    </div>
+    </ChatBubble>
   )
 }
 

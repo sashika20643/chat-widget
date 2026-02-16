@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/shadCN/button'
+import { ChatBubble } from '@/components/ui/chat-bubble'
 import { cn } from '@/utils/utils'
 import type { Message as MessageType, MessageContent } from '@/types/chat'
 
@@ -8,13 +9,6 @@ interface MessageProps {
 }
 
 function Message({ message, onButtonClick }: MessageProps) {
-  function formatTime(date: Date) {
-    return new Intl.DateTimeFormat('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(date)
-  }
-
   const isUser = message.role === 'user'
   const content: MessageContent = typeof message.content === 'string' 
     ? { text: message.content }
@@ -23,18 +17,17 @@ function Message({ message, onButtonClick }: MessageProps) {
   return (
     <div
       className={cn(
-        'flex gap-3',
+        'flex gap-3 w-full min-w-0',
         isUser ? 'justify-end' : 'justify-start'
       )}
     >
-      <div
-        className={cn(
-          'max-w-[85%] sm:max-w-[75%] rounded-lg px-3 py-2 sm:px-4 min-w-0 bg-background border border-[hsl(var(--tertiary))]'
-        )}
+      <ChatBubble
+        variant={isUser ? 'user' : 'assistant'}
+        className="min-w-[80px] sm:min-w-[100px] max-w-[75%] sm:max-w-[65%] px-3 py-2 sm:px-4 w-fit"
       >
         {/* Text Content */}
         {content.text && (
-          <p className="text-xs sm:text-sm whitespace-pre-wrap break-words text-foreground">
+          <p className="text-sm sm:text-base whitespace-pre-wrap break-words overflow-wrap-anywhere word-break-break-word">
             {content.text}
           </p>
         )}
@@ -61,6 +54,7 @@ function Message({ message, onButtonClick }: MessageProps) {
                 key={index}
                 variant={button.variant || 'outline'}
                 size="sm"
+                className="rounded-full"
                 onClick={() => {
                   button.onClick()
                   if (onButtonClick) {
@@ -73,12 +67,7 @@ function Message({ message, onButtonClick }: MessageProps) {
             ))}
           </div>
         )}
-
-        {/* Timestamp */}
-        <span className="text-xs mt-2 block text-muted-foreground">
-          {formatTime(message.timestamp)}
-        </span>
-      </div>
+      </ChatBubble>
     </div>
   )
 }

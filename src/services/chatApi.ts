@@ -11,7 +11,8 @@ export async function detectScenario(message: string): Promise<ScenarioResponse>
           lowerMessage.includes('showroom') || 
           lowerMessage.includes('reserve') || 
           lowerMessage.includes('appointment') ||
-          lowerMessage.includes('book')) {
+          lowerMessage.includes('book') ||
+          lowerMessage.includes('timeslot')) {
         
         resolve({
           scenario: 'reservation',
@@ -22,6 +23,22 @@ export async function detectScenario(message: string): Promise<ScenarioResponse>
               onClick: () => {},
               variant: 'black'
             }]
+          }
+        })
+      } else if (lowerMessage.includes('furniture') && lowerMessage.includes('scan')) {
+        // Furniture scanning
+        resolve({
+          scenario: null,
+          message: {
+            text: "I can help you with furniture scanning! You can use our AR feature to scan and visualize furniture in your space. Would you like to try it?"
+          }
+        })
+      } else if (lowerMessage.includes('about') && lowerMessage.includes('h100')) {
+        // About H100
+        resolve({
+          scenario: null,
+          message: {
+            text: "H100 is a premium furniture brand offering high-quality, stylish furniture pieces. We specialize in creating beautiful, functional spaces with our curated collection of furniture. How can I help you learn more?"
           }
         })
       } else {
@@ -65,9 +82,11 @@ export async function submitReservation(_data: {
   date: Date
   time: string
   userDetails: {
-    name: string
+    firstName: string
+    lastName: string
     email: string
     phone: string
+    message?: string
   }
 }): Promise<{ success: boolean; message: string }> {
   // Dummy API - replace with actual API

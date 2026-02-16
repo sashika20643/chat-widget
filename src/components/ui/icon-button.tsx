@@ -8,14 +8,14 @@ export interface IconButtonProps extends ButtonProps {
 
 function IconButton({ 
   className, 
-  variant = "outline", 
+  variant = "ghost", 
   size = "icon", 
   icon, 
   children, 
   ...props 
 }: IconButtonProps) {
   const iconElement = typeof icon === "string" ? (
-    <img src={icon} alt={props["aria-label"]} className="h-full w-full object-contain" />
+    <img src={icon} alt={props["aria-label"]} className={cn("h-full w-full object-contain", className?.includes("rotate") && className)} />
   ) : (
     icon
   )

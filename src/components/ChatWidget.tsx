@@ -3,11 +3,12 @@ import { Card } from '@/components/ui/shadCN/card'
 import { ScrollArea } from '@/components/ui/shadCN/scroll-area'
 import { Avatar, AvatarImage } from '@/components/ui/shadCN/avatar'
 import { IconButton } from '@/components/ui/icon-button'
-import { ArrowLeft } from 'lucide-react'
+import { cn } from '@/utils/utils'
 import Message from '@/components/Message'
 import ChatWidgetButton from '@/components/ChatWidgetButton'
 import ChatInputBar from '@/components/ChatInputBar'
 import ReservationFlow from '@/components/flows/ReservationFlow'
+import WelcomeScreen from '@/components/WelcomeScreen'
 import { detectScenario, getAvailableTimeSlots, submitReservation } from '@/services/chatApi'
 import { createCalendarEvent } from '@/services/calendarApi'
 import { useAppDispatch } from '@/store/hooks'
@@ -20,20 +21,14 @@ import type { Message as MessageType, ChatWidgetProps, ConversationFlow, Reserva
 
 export interface ChatWidgetRef {
   setIsOpen: (open: boolean) => void
+  startBookingFlow: () => void
 }
 
 const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({ 
   placeholder = 'Type your message...',
   onSendMessage 
 }, ref) => {
-  const [messages, setMessages] = useState<MessageType[]>([
-    {
-      id: '1',
-      content: 'Hello! How can I help you today?',
-      role: 'assistant',
-      timestamp: new Date(),
-    },
-  ])
+  const [messages, setMessages] = useState<MessageType[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const [flow, setFlow] = useState<ConversationFlow>({ state: 'idle' })
@@ -44,6 +39,7 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
 
   useImperativeHandle(ref, () => ({
     setIsOpen,
+    startBookingFlow,
   }))
 
   // Auto-scroll to bottom when messages or flow changes
@@ -102,11 +98,9 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
     setIsOpen(true)
   }
 
-  function handleButtonClick(action: string) {
-    if (action === 'book_an_appointment') {
-      console.log('[ChatWidget] Appointment button clicked, fetching calendar events')
+  function startBookingFlow() {
+    console.log('[ChatWidget] Starting booking flow')
       
-      // Fetch calendar events for the next 2 months
       const today = new Date()
       const startDate = new Date(today.getFullYear(), today.getMonth(), 1)
       const endDate = new Date(today.getFullYear(), today.getMonth() + 2, 0, 23, 59, 59)
@@ -122,6 +116,49 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
         state: 'reservation_flow',
         step: 'select_date'
       })
+  }
+
+  function handleButtonClick(action: string) {
+    if (action === 'book_an_appointment') {
+      console.log('[ChatWidget] Appointment button clicked, fetching calendar events')
+      startBookingFlow()
+    }
+  }
+
+  async function handleTagClick(tag: string) {
+    // Handle special tag actions
+    if (tag.toLowerCase().includes('book') || tag.toLowerCase().includes('timeslot')) {
+      // Trigger booking flow
+      startBookingFlow()
+      return
+    }
+
+    // For other tags, send as a message
+    const userMessage: MessageType = {
+      id: Date.now().toString(),
+      content: tag,
+      role: 'user',
+      timestamp: new Date(),
+    }
+
+    setMessages((prev) => [...prev, userMessage])
+    setIsLoading(true)
+
+    // Check scenario when tag is clicked
+    const response = await detectScenario(tag)
+    
+    const assistantMessage: MessageType = {
+      id: (Date.now() + 1).toString(),
+      content: response.message,
+      role: 'assistant',
+      timestamp: new Date(),
+    }
+
+    setMessages((prev) => [...prev, assistantMessage])
+    setIsLoading(false)
+
+    if (onSendMessage) {
+      onSendMessage(tag)
     }
   }
 
@@ -174,16 +211,17 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
       })
 
       // Create calendar event
+      const fullName = `${details.firstName} ${details.lastName}`
       await createCalendarEvent({
-        subject: `Appointment with ${details.name}-test`,
-        content: `Appointment booking for ${details.name}-test`,
+        subject: `Appointment with ${fullName}-test`,
+        content: `Appointment booking for ${fullName}-test${details.message ? `\n\nMessage: ${details.message}` : ''}`,
         start_time: startTimeISO,
         end_time: endTimeISO,
         location: 'Showroom',
         attendees: [
           {
             email: details.email,
-            name: details.name,
+            name: fullName,
             type: 'required' as const
           }
         ],
@@ -254,26 +292,33 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
   
 
   return (
-    <Card className="fixed bottom-4 sm:inset-x-auto sm:right-4 sm:left-auto w-[calc(100%)] sm:w-[26rem] lg:w-[28rem] h-[calc(100vh-2rem)] sm:h-[600px] lg:h-[700px] max-h-[600px] lg:max-h-[700px] z-50 flex flex-col shadow-2xl border-2">
+    <Card className={cn(
+      "fixed z-50 flex flex-col shadow-2xl border-2 border-black sm:border-2 sm:border-muted",
+      // Mobile (<640px): Full width overlay, slides from bottom
+      "bottom-0 left-0 right-0 w-full h-[calc(100vh-2rem)] max-h-[calc(100vh-2rem)]",
+      "animate-in slide-in-from-bottom duration-300",
+      // sm (≥640px): Fixed position bottom-right corner
+      "sm:bottom-4 sm:left-auto sm:right-4 sm:w-[30rem] sm:h-[800px] sm:max-h-[85%] sm:rounded-lg"
+    )}>
       {/* Header */}
       <div className="flex items-center justify-between p-3 sm:p-4 border-b flex-shrink-0">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {flow.state === 'reservation_flow' && flow.step ? (
             <IconButton
-              icon={<ArrowLeft className="h-full w-full" />}
+              icon={CollapsIcon}
               aria-label="Back"
               variant="ghost"
               size="icon"
-              className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0"
+              className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0 [&>img]:rotate-90"
               onClick={handleBack}
             />
-          ) : (
-            <Avatar className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0">
+          ) : messages.length > 0 ? (
+            <Avatar className="h-7 w-7 sm:h-9 sm:w-9 flex-shrink-0">
               <AvatarImage src={H100Icon} alt="H100 AI" />
           </Avatar>
-          )}
+          ) : null}
           </div>
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <IconButton
             icon={HelpIcon}
             aria-label="Help"
@@ -312,16 +357,18 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
             />
           </div>
         </div>
+      ) : messages.length === 0 ? (
+        <WelcomeScreen onTagClick={handleTagClick} />
       ) : (
-        <ScrollArea className="flex-1 p-3 sm:p-4 min-h-0">
-        <div className="space-y-4">
-          {messages.map((message) => (
-              <Message 
-                key={message.id} 
-                message={message}
-                onButtonClick={handleButtonClick}
-              />
-          ))}
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="p-3 sm:p-4 space-y-4 min-w-0 overflow-visible">
+            {messages.map((message) => (
+                <Message 
+                  key={message.id} 
+                  message={message}
+                  onButtonClick={handleButtonClick}
+                />
+            ))}
 
             {isLoading && (
               <div className="text-xs text-muted-foreground">Thinking...</div>
@@ -329,8 +376,8 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
             
             {/* Scroll anchor */}
             <div ref={messagesEndRef} />
-        </div>
-      </ScrollArea>
+          </div>
+        </ScrollArea>
       )}
 
       {/* Input Area */}

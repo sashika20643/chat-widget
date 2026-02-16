@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Beistelltisch Caruelle Nussbaum, vintage | Bogen33 Nachbau</title>
-    <link rel="stylesheet" href="widget.css">
+    <link rel="stylesheet" href="assets/widget.css">
 
     <style>
         /* --- GLOBAL RESET & TYPOGRAPHY --- */
@@ -257,6 +257,8 @@
             border: 1px solid #000;
             transition: all 0.2s;
             text-align: center;
+            cursor: pointer;
+            font-family: inherit;
         }
 
         .btn-request:hover {
@@ -412,7 +414,7 @@
                     <div class="input-group">
                         <input type="number" value="1" min="1">
                     </div>
-                    <a href="#" class="btn-request">Anfragen</a>
+                    <button id="request-button" class="btn-request">Anfragen</button>
                     
                     <a href="#" class="more-products-link">Weitere Produkte anfragen</a>
                 </div>
@@ -461,6 +463,29 @@
                     this.classList.add('active');
                 });
             });
+
+            // Button click notification
+            const requestButton = document.getElementById('request-button');
+            if (requestButton) {
+                requestButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Wait for widget to load and toast to be available
+                    function showNotification() {
+                        if (window.toast) {
+                            window.toast.info('Button clicked detected', {
+                                description: 'The request button was clicked',
+                                duration: 3000,
+                            });
+                        } else {
+                            // Retry after a short delay if toast not yet available
+                            setTimeout(showNotification, 100);
+                        }
+                    }
+                    
+                    showNotification();
+                });
+            }
         });
     </script>
     <!-- Configure API URL via data attribute to avoid CORS issues -->
