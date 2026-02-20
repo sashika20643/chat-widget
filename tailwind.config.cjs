@@ -8,10 +8,22 @@ module.exports = {
   theme: {
   	extend: {
   		fontFamily: {
-  			sans: ['Helvetica Now', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+  			sans: ['Helvetica Neue', 'Helvetica Now', 'Helvetica', 'Arial', 'sans-serif'],
+  		},
+  		spacing: {
+  			'35': '35px',  /* Send button height */
+  			'37': '37px',  /* Icon button, calendar day, timeslot */
+  			'44': '44px',  /* Button min height */
+  			'46': '46px',  /* Input height */
+  			'58': '58px',  /* Chat widget button mobile */
+  			'62': '62px',  /* Header mobile */
+  			'69': '69px',  /* Chat widget button desktop */
   		},
   		screens: {
   			'desktop': '1500px',
+  		},
+  		borderWidth: {
+  			'icon': 'var(--border-icon)',
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
@@ -52,6 +64,7 @@ module.exports = {
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
+  			dark: 'var(--color-border-strong)',
   			shiki: {
   				light: 'var(--shiki-light)',
   				'light-bg': 'var(--shiki-light-bg)',

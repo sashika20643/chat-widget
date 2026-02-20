@@ -1,5 +1,5 @@
-import { useRef, useEffect } from 'react'
-import { Send } from 'lucide-react'
+import { useRef, useEffect, useState } from 'react'
+import { Send, Plus, X } from 'lucide-react'
 import { Button } from '@/components/ui/shadCN/button'
 import { cn } from '@/utils/utils'
 import { IconButton } from '@/components/ui/icon-button'
@@ -23,17 +23,30 @@ function ChatInputBar({
   onKeyDown,
 }: ChatInputBarProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [mobileIconsOpen, setMobileIconsOpen] = useState(false)
+
+  const MIN_HEIGHT_PX = 44
+  const MAX_HEIGHT_RATIO = 0.4 // 40% of viewport height
 
   function adjustHeight() {
     const el = textareaRef.current
     if (!el) return
+    const maxHeightPx = window.innerHeight * MAX_HEIGHT_RATIO
     el.style.height = '0'
-    el.style.height = `${Math.min(el.scrollHeight, window.innerHeight * 0.4)}px`
+    const contentHeight = el.scrollHeight
+    el.style.height = `${Math.min(Math.max(contentHeight, MIN_HEIGHT_PX), maxHeightPx)}px`
   }
 
   useEffect(() => {
     adjustHeight()
   }, [value])
+
+  useEffect(() => {
+    const win = typeof window === 'undefined' ? null : window
+    if (!win) return
+    win.addEventListener('resize', adjustHeight)
+    return () => win.removeEventListener('resize', adjustHeight)
+  }, [])
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -45,56 +58,110 @@ function ChatInputBar({
   }
 
   return (
-    <div className="p-3 sm:p-4 flex-shrink-0">
-        <div className="flex items-end gap-1.5 sm:gap-2">
-          {/* Icon Buttons */}
-          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+    <div className="p-4 sm:p-5 flex-shrink-0">
+      <div className="flex items-end gap-2 sm:gap-3">
+        {/* Mobile: + only; tap to show Gallery, AR, Camera. Desktop: always show three icons */}
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          {/* Mobile: + button; tap to show vertical popup with three icons */}
+          <div className="relative flex sm:hidden items-center">
+            <IconButton
+              icon={<Plus className="h-6 w-6" />}
+              aria-label="Show more options"
+              size="sm"
+              className="h-10 w-10 border border-[#000000] bg-transparent hover:bg-transparent active:bg-transparent"
+              onClick={() => setMobileIconsOpen((open) => !open)}
+            />
+            {mobileIconsOpen && (
+              <div
+                className="absolute bottom-full left-0 mb-1.5 flex flex-col rounded-md bg-background p-2 shadow-lg"
+                role="dialog"
+                aria-label="Attach options"
+              >
+                <div className="flex items-center justify-end pb-1.5 mb-1.5">
+                  <IconButton
+                    icon={<X className="h-5 w-5" />}
+                    aria-label="Close"
+                    size="sm"
+                    className="h-9 w-9"
+                    onClick={() => setMobileIconsOpen(false)}
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <IconButton
+                    icon={GalleryIcon}
+                    aria-label="Gallery"
+                    size="sm"
+                    className="h-10 w-10"
+                    onClick={() => setMobileIconsOpen(false)}
+                  />
+                  <IconButton
+                    icon={ARIcon}
+                    aria-label="AR"
+                    size="sm"
+                    className="h-10 w-10"
+                    onClick={() => setMobileIconsOpen(false)}
+                  />
+                  <IconButton
+                    icon={CameraIcon}
+                    aria-label="Camera"
+                    size="sm"
+                    className="h-10 w-10"
+                    onClick={() => setMobileIconsOpen(false)}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+          {/* Desktop: always show three icons */}
+          <div className="hidden sm:flex items-center gap-3">
             <IconButton
               icon={GalleryIcon}
               aria-label="Gallery"
               size="sm"
-              className="h-8 w-8 sm:h-10 sm:w-10"
+              className="h-10 w-10 sm:h-12 sm:w-12"
             />
             <IconButton
               icon={ARIcon}
               aria-label="AR"
               size="sm"
-              className="h-8 w-8 sm:h-10 sm:w-10"
+              className="h-10 w-10 sm:h-12 sm:w-12"
             />
             <IconButton
               icon={CameraIcon}
               aria-label="Camera"
               size="sm"
-              className="h-8 w-8 sm:h-10 sm:w-10"
+              className="h-10 w-10 sm:h-12 sm:w-12"
             />
-          </div>
-          
-          {/* Textarea with Send Button */}
-          <div className="relative flex-1 min-w-0 flex flex-col">
-            <textarea
-              ref={textareaRef}
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={placeholder}
-              rows={1}
-              className={cn(
-                'w-full min-h-[2.25rem] max-h-[40vh] resize-none overflow-y-auto rounded-md border-0 bg-transparent px-3 py-2 pr-10 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
-                '[scrollbar-width:none] [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar]:h-0'
-              )}
-            />
-            <Button
-              onClick={onSend}
-              size="icon"
-              variant="ghost"
-              disabled={!value.trim()}
-              className="absolute right-1 bottom-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0 rounded-full bg-transparent hover:bg-transparent border border-black p-3"
-            >
-              <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            </Button>
           </div>
         </div>
+
+        {/* Input box + Send: grows with content up to 40vh, then scrollable */}
+        <div className="flex flex-1 min-w-0 min-h-[60px] items-end border border-[#000000] rounded-3xl sm:rounded-[28px] overflow-hidden p-[10.5px]">
+          <textarea
+            ref={textareaRef}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            rows={1}
+            className={cn(
+              'flex-1 min-w-0 min-h-[44px] resize-none overflow-y-auto border-0 bg-transparent px-3 py-2 text-base shadow-none transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+              '[scrollbar-width:none] [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar]:h-0'
+            )}
+            style={{ maxHeight: '40vh' }}
+          />
+          <Button
+            onClick={onSend}
+            size="icon"
+            variant="ghost"
+            disabled={!value.trim()}
+            className="h-[40px] w-[40px] flex-shrink-0 rounded-full bg-transparent hover:bg-transparent border border-[#000000] p-0 flex items-center justify-center"
+          >
+            <Send className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
+    </div>
   )
 }
 

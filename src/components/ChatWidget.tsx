@@ -416,13 +416,13 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
         />
       )}
     <Card className={cn(
-      "fixed z-50 flex flex-col shadow-2xl border-2 border-black sm:border-2 sm:border-muted",
-      // Mobile (<640px): Full width overlay, slides from bottom
-      "bottom-0 left-0 right-0 w-full h-[calc(100vh-2rem)] max-h-[calc(100vh-2rem)]",
+      "fixed z-50 flex flex-col shadow-2xl border-2 border-dark sm:border-muted",
+      // Mobile (<640px): Full width overlay, full height, slides from bottom
+      "bottom-0 left-0 right-0 w-full h-screen max-h-screen",
       "animate-in slide-in-from-bottom duration-300",
-      // sm (≥640px): Fixed position bottom-right corner (popup)
-      "sm:bottom-4 sm:left-auto sm:right-4 sm:w-[30rem] sm:h-[800px] sm:max-h-[85%] sm:rounded-lg",
-      // ≥1500px: Full-height right sidebar so host can shrink main panel via body[data-chat-open]
+      // sm (≥640px): Full height popup bottom-right
+      "sm:bottom-0 sm:left-auto sm:right-0 sm:top-0 sm:w-[30rem] sm:h-screen sm:max-h-none sm:rounded-none sm:rounded-l-lg",
+      // ≥1500px: Full-height right sidebar (unchanged)
       "min-[1500px]:right-0 min-[1500px]:bottom-0 min-[1500px]:top-0 min-[1500px]:h-screen min-[1500px]:w-[28rem] min-[1500px]:max-h-none min-[1500px]:rounded-l-lg"
     )}>
       {/* Header */}
@@ -434,11 +434,11 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
               aria-label="Back"
               variant="ghost"
               size="icon"
-              className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0 [&>img]:rotate-90"
+              className="h-37 w-37 lg:h-44 lg:w-44 flex-shrink-0 [&>img]:rotate-90"
               onClick={handleBack}
             />
           ) : messages.length > 0 ? (
-            <Avatar className="h-7 w-7 sm:h-9 sm:w-9 flex-shrink-0">
+            <Avatar className="h-37 w-37 lg:h-44 lg:w-44 flex-shrink-0">
               <AvatarImage src={H100Icon} alt="H100 AI" />
           </Avatar>
           ) : null}
@@ -449,21 +449,21 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
             aria-label="Help"
             variant="ghost"
             size="icon"
-            className="h-7 w-7 sm:h-8 sm:w-8"
+            className="h-37 w-37 lg:h-44 lg:w-44"
           />
           <IconButton
             icon={BookmarkCleanIcon}
             aria-label="Bookmark"
             variant="ghost"
             size="icon"
-            className="h-7 w-7 sm:h-8 sm:w-8"
+            className="h-37 w-37 lg:h-44 lg:w-44"
           />
           <IconButton
             icon={CollapsIcon}
             aria-label="Collapse"
             variant="ghost"
             size="icon"
-            className="h-7 w-7 sm:h-8 sm:w-8"
+            className="h-37 w-37 lg:h-44 lg:w-44"
             onClick={handleClose}
           />
         </div>
@@ -491,7 +491,7 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
             <div
               className="sticky top-0 -mt-3 -mx-4 pt-0 px-4 h-6 flex-shrink-0 pointer-events-none z-10"
               style={{
-                background: 'linear-gradient(rgb(141 136 136 / 50%) 0%, rgb(214 207 207 / 20%) 35%, rgb(255 255 255 / 5%) 70%, #00000000 40%)',
+                background: 'linear-gradient(color-mix(in srgb, var(--color-text-muted) 50%, transparent) 0%, color-mix(in srgb, var(--color-text-muted) 20%, transparent) 35%, transparent 70%)',
               }}
 
             />

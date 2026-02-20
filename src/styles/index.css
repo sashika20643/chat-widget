@@ -45,7 +45,15 @@
 
 @layer base {
   :root {
-    /* Base colors - Main background and text */
+    /* Color tokens (use in CSS; Tailwind uses semantic vars below) */
+    --color-primary: #439143;
+    --color-accent: #ef791e;
+    --color-surface: #ffffff;
+    --color-border-strong: #1d1d1b;
+    --color-text-muted: #b3b3b3;
+    --border-icon: 0.85pt; /* Icon border width (#1d1d1b) – not used on IconButton */
+
+    /* Semantic colors (HSL for Tailwind hsl(var(--…))) */
     --background: 0 0% 100%; /* Main page background (white in light mode) */
     --foreground: 0 0% 13.3%; /* Main text color (#222222) */
     
@@ -172,7 +180,8 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: 'Helvetica Now', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Helvetica Neue', 'Helvetica Now', Helvetica, Arial, sans-serif;
+    font-weight: 500; /* Medium */
   }
 }
 
@@ -180,68 +189,67 @@
   /* Chat bubble with tail for assistant messages */
   .chat-bubble-assistant {
     position: relative;
-    background-color: white !important;
-    border: solid 1px black;
+    padding: 23px;
+    background-color: var(--color-surface) !important;
+    border: solid 1px var(--color-border-strong);
     border-radius: 1.5em;
     overflow: visible;
   }
-  
-  /* Tail - black border */
+
   .chat-bubble-assistant .tail {
     position: absolute;
     bottom: -13px;
     left: 17px;
     width: 0;
     height: 0;
-    border-left: 27px solid black;
+    border-left: 27px solid var(--color-border-strong);
     border-top: 0 solid transparent;
     border-bottom: 14px solid transparent;
-    
   }
-  
-  /* Tail - white fill */
+
   .chat-bubble-assistant .tail2 {
     position: absolute;
     bottom: -12px;
     left: 19px;
     width: 0;
     height: 0;
-    border-left: 25px solid white;
+    border-left: 25px solid var(--color-surface);
     border-top: 0 solid transparent;
     border-bottom: 15px solid transparent;
     transform: translateX(-1px);
   }
-  
-  /* Chat bubble with tail for user messages */
+
+  /* Chat bubble with tail for user messages (same as assistant: white bg, black text) */
   .chat-bubble-user {
     position: relative;
-    background-color: hsl(var(--background)) !important;
-    border: solid 1px hsl(var(--tertiary));
+    margin: 23px;
+    padding: 23px;
+    background-color: var(--color-surface) !important;
+    color: var(--color-border-strong);
+    border: solid 1px var(--color-border-strong);
     border-radius: 1.5em;
     overflow: visible;
   }
-  
-  /* Tail - flipped to right side using same styles */
+
   .chat-bubble-user .tail {
     position: absolute;
     bottom: -14px;
     right: 17px;
     width: 0;
     height: 0;
-    border-left: 27px solid hsl(var(--tertiary));
+    border-left: 27px solid var(--color-border-strong);
     border-top: 0 solid transparent;
     border-bottom: 14px solid transparent;
-    transform: scaleX(-1) ;
+    transform: scaleX(-1);
   }
-  
-  /* Tail - background fill (flipped) */
+
   .chat-bubble-user .tail2 {
     position: absolute;
     bottom: -13px;
     right: 17px;
     width: 0;
     height: 0;
-    border-left: 25px solid hsl(var(--background));
+    border-left: 25px solid var(--color-surface);
     border-top: 0 solid transparent;
     border-bottom: 15px solid transparent;
     transform: scaleX(-1) translateX(1px);
@@ -257,9 +265,9 @@
   
   /* Time slot picker - Hover state on picked slots */
   .time-slot-picked:hover {
-    background-color: hsl(var(--warning)); /* Orange warning color on hover */
-    color: hsl(var(--warning-foreground)); /* Black text on warning background */
-    border-color: hsl(var(--warning)); /* Orange border */
+    background-color: var(--color-accent);
+    color: var(--color-surface);
+    border-color: var(--color-accent);
   }
 }
 

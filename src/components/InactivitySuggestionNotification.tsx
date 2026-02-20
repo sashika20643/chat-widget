@@ -73,19 +73,19 @@ export function InactivitySuggestionNotification({
         aria-label="Suggestion"
       >
         {/* Speech bubble with tail */}
-        <div className="relative rounded-2xl border-2 border-black/20 bg-white px-5 pt-4 pb-5 shadow-lg">
+        <div className="relative rounded-2xl border-2 border-border bg-background px-5 pt-4 pb-5 shadow-lg">
           {/* Close button */}
           <button
             type="button"
             onClick={onDismiss}
-            className="absolute left-3 top-3 rounded-full p-1.5 text-black/60 hover:bg-black/5 hover:text-black"
+            className="absolute left-3 top-3 rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
           </button>
 
           {/* Message with typing animation */}
-          <p className="min-h-[2em] pr-12 pt-8 text-base font-medium leading-snug text-black">
+          <p className="min-h-[2em] pr-12 pt-8 text-base font-medium leading-snug text-foreground">
             {displayedText}
             {!displayedText && <span className="invisible">{message}</span>}
           </p>
@@ -94,7 +94,7 @@ export function InactivitySuggestionNotification({
           <button
             type="button"
             onClick={onAction}
-            className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-green-600 text-white shadow hover:bg-green-700"
+            className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow hover:opacity-90"
             aria-label="View recommendations"
           >
             <ChevronRight className="h-5 w-5" />
@@ -106,7 +106,7 @@ export function InactivitySuggestionNotification({
               {thumbnailUrls.slice(0, 6).map((url, i) => (
                 <div
                   key={i}
-                  className="aspect-square overflow-hidden rounded-md border border-black/10 bg-muted"
+                  className="aspect-square overflow-hidden rounded-md border border-border bg-muted"
                 >
                   <img src={url} alt="" className="h-full w-full object-cover" />
                 </div>
@@ -116,7 +116,7 @@ export function InactivitySuggestionNotification({
 
           {/* Speech bubble tail (pointing down-right) */}
           <div
-            className="absolute -bottom-2.5 left-8 h-5 w-5 rotate-45 border-b-2 border-r-2 border-black/20 bg-white"
+            className="absolute -bottom-2.5 left-8 h-5 w-5 rotate-45 border-b-2 border-r-2 border-border bg-background"
             aria-hidden
           />
         </div>
@@ -128,7 +128,7 @@ export function InactivitySuggestionNotification({
   return (
     <div
       className={cn(
-        'relative flex flex-shrink-0 items-center gap-3 rounded-xl border-2 border-black/15 bg-white px-4 py-3 shadow-sm',
+        'relative flex flex-shrink-0 items-center gap-3 rounded-xl border-2 border-border bg-background px-4 py-3 shadow-sm',
         'animate-in fade-in slide-in-from-bottom-2 duration-300'
       )}
       role="dialog"
@@ -137,22 +137,22 @@ export function InactivitySuggestionNotification({
       <button
         type="button"
         onClick={onDismiss}
-        className="flex-shrink-0 rounded-full p-1.5 text-black/60 hover:bg-black/5 hover:text-black"
+        className="flex-shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
         aria-label="Close"
       >
         <X className="h-5 w-5" />
       </button>
-      <p className="min-w-0 flex-1 text-base font-medium text-black line-clamp-2 leading-snug">
+      <p className="min-w-0 flex-1 text-base font-medium text-foreground line-clamp-2 leading-snug">
         {message}
       </p>
       <button
         type="button"
         onClick={onAction}
-        className="relative flex flex-shrink-0 items-center justify-center gap-1 rounded-full bg-green-600 px-4 py-2 text-base font-medium text-white shadow hover:bg-green-700"
+        className="relative flex flex-shrink-0 items-center justify-center gap-1 rounded-full bg-primary px-4 py-2 text-base font-medium text-primary-foreground shadow hover:opacity-90"
       >
         <span className="hidden sm:inline">View</span>
         <ChevronRight className="h-5 w-5" />
-        <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 animate-ping rounded-full bg-white/80" aria-hidden />
+        <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 animate-ping rounded-full bg-background/80" aria-hidden />
       </button>
     </div>
   )

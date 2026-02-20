@@ -24,7 +24,7 @@ function UserDetailsForm({ onSubmit }: UserDetailsFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
-      <ChatBubble variant="assistant" className="p-4">
+      <ChatBubble variant="assistant" className="p-4 rounded-3xl">
       <p className="text-sm sm:text-base text-foreground mb-4">
         Now we just need your contact details. We will only use your data to communicate about the appointment :)
       </p>
@@ -73,14 +73,13 @@ function UserDetailsForm({ onSubmit }: UserDetailsFormProps) {
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Message (optional)"
           className={cn(
-            "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+            "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-dark disabled:cursor-not-allowed disabled:opacity-50 resize-none"
           )}
         />
       </div>
 
       <Button type="submit" variant="black" size="sm" className=" mt-4" disabled={!firstName || !lastName || !email || !phone}>
-        Confirm Appointment
-      </Button>
+Done      </Button>
       </ChatBubble>
     </form>
   )

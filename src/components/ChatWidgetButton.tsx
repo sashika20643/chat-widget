@@ -15,24 +15,24 @@ function ChatWidgetButton({ onOpen }: ChatWidgetButtonProps) {
         icon={H100Icon}
         aria-label="H100 AI"
         onClick={onOpen}
-        className="h-14 w-14 bg-background shadow-lg hover:shadow-xl transition-all duration-200 hover:bg-[hsl(var(--gray-50))]"
+        className="h-58 w-58 lg:h-69 lg:w-69  shadow-lg hover:shadow-xl transition-all duration-200"
       />
 
       {/* Chat Bubble */}
-      <div className="flex items-center gap-2 sm:gap-3 bg-background px-3 sm:px-4 py-2 sm:py-3 rounded-full shadow-lg border border-black">
-        <span className="text-xs sm:text-base  text-black max-w-[200px] sm:max-w-[280px]">
+      <div className="flex items-center gap-2 sm:gap-3 bg-background px-3 sm:px-4 py-2 sm:py-3 rounded-full shadow-lg border border-icon border-dark">
+        <span className="text-xs sm:text-base text-foreground max-w-[200px] sm:max-w-[280px]">
           Hi, I am your personal H100 furniture consultant.
         </span>
         <IconButton
           icon={BookmarkCleanIcon}
           aria-label="Bookmark"
-          className="h-8 w-8 bg-background flex-shrink-0"
+          className="h-8 w-8 sm:h-37 sm:w-37 bg-background flex-shrink-0"
         />
         <IconButton
           icon={ExpandIcon}
           aria-label="Expand chat"
           onClick={onOpen}
-          className="h-8 w-8 bg-background hover:shadow-xl flex-shrink-0"
+          className="h-8 w-8 sm:h-37 sm:w-37 bg-background hover:shadow-xl flex-shrink-0"
         />
       </div>
     </div>

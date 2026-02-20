@@ -23,11 +23,11 @@ function Message({ message, onButtonClick }: MessageProps) {
     >
       <ChatBubble
         variant={isUser ? 'user' : 'assistant'}
-        className="min-w-[80px] sm:min-w-[100px] max-w-[75%] sm:max-w-[65%] px-3 py-2 sm:px-4 w-fit"
+        className="min-w-[80px] sm:min-w-[100px] max-w-[80%] sm:max-w-[80%] w-fit"
       >
         {/* Text Content */}
         {content.text && (
-          <p className="text-sm sm:text-base whitespace-pre-wrap break-words overflow-wrap-anywhere word-break-break-word">
+          <p className="text-sm sm:text-base whitespace-pre-wrap break-words overflow-wrap-anywhere word-break-break-word leading-7">
             {content.text}
           </p>
         )}
@@ -55,7 +55,7 @@ function Message({ message, onButtonClick }: MessageProps) {
                 href={card.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block rounded-md overflow-hidden border border-black/10 bg-muted hover:border-black/25 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="block rounded-md overflow-hidden border border-border bg-muted hover:border-foreground/25 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 title={card.title}
               >
                 <img
@@ -76,7 +76,7 @@ function Message({ message, onButtonClick }: MessageProps) {
                 key={index}
                 variant={button.variant || 'outline'}
                 size="sm"
-                className="rounded-full"
+                className="rounded-full px-4"
                 onClick={() => {
                   button.onClick()
                   if (onButtonClick) {
