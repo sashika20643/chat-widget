@@ -37,7 +37,7 @@ function UserDetailsForm({ onSubmit }: UserDetailsFormProps) {
             onChange={(e) => setFirstName(e.target.value)}
             placeholder="First name"
             required
-            className="text-base text-foreground"
+            className="text-base text-foreground rounded-xl"
           />
 
           <Input
@@ -46,7 +46,7 @@ function UserDetailsForm({ onSubmit }: UserDetailsFormProps) {
             onChange={(e) => setLastName(e.target.value)}
             placeholder="Last name"
             required
-            className="text-base text-foreground"
+            className="text-base text-foreground rounded-xl"
           />
         </div>
 
@@ -56,7 +56,7 @@ function UserDetailsForm({ onSubmit }: UserDetailsFormProps) {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
           required
-          className="text-base text-foreground"
+          className="text-base text-foreground rounded-xl"
         />
 
         <Input
@@ -65,7 +65,7 @@ function UserDetailsForm({ onSubmit }: UserDetailsFormProps) {
           onChange={(e) => setPhone(e.target.value)}
           placeholder="Phone number"
           required
-          className="text-base text-foreground"
+          className="text-base text-foreground rounded-xl"
         />
 
         <textarea
@@ -73,13 +73,14 @@ function UserDetailsForm({ onSubmit }: UserDetailsFormProps) {
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Message (optional)"
           className={cn(
-            "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-dark disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+            "flex h-9 w-full rounded-xl border border-input bg-transparent px-3 py-1 text-base text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-dark disabled:cursor-not-allowed disabled:opacity-50 resize-none"
           )}
         />
       </div>
 
-      <Button type="submit" variant="black" size="sm" className=" mt-4" disabled={!firstName || !lastName || !email || !phone}>
-Done      </Button>
+      <Button type="submit" variant="black" size="sm" className="mt-4 rounded-full" disabled={!firstName || !lastName || !email || !phone}>
+        Done
+      </Button>
       </ChatBubble>
     </form>
   )

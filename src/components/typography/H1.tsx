@@ -8,7 +8,7 @@ export interface H1Props extends React.HTMLAttributes<HTMLElement> {
 export function H1({ className, as: Comp = 'h1', ...props }: H1Props) {
   return (
     <Comp
-      className={cn('text-3xl font-medium', className)}
+      className={cn('text-2xl font-medium', className)}
       {...props}
     />
   )

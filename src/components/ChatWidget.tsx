@@ -13,6 +13,8 @@ import { detectScenario, getAvailableTimeSlots, submitReservation } from '@/serv
 import { createCalendarEvent } from '@/services/calendarApi'
 import { useAppDispatch } from '@/store/hooks'
 import { fetchCalendarEventsAsync } from '@/store/slices/calendarEventsSlice'
+import { addMessage } from '@/store/slices/chatSlice'
+import { useChatMessages, useChatWidgetOpen, useMediaQuery, useScrollToBottom } from '@/hooks'
 import H100Icon from '@/assets/icons/H100 AI ICON.svg'
 import HelpIcon from '@/assets/icons/Help Icon.svg'
 import BookmarkCleanIcon from '@/assets/icons/Bookmark Clean Icon.svg'
@@ -31,119 +33,33 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
   placeholder = 'Type your message...',
   onSendMessage 
 }, ref) => {
-  const [messages, setMessages] = useState<MessageType[]>([])
+  const messages = useChatMessages()
   const [inputValue, setInputValue] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const [flow, setFlow] = useState<ConversationFlow>({ state: 'idle' })
   const [reservationData, setReservationData] = useState<ReservationData>({})
   const [isLoading, setIsLoading] = useState(false)
   const [showInactivitySuggestion, setShowInactivitySuggestion] = useState(false)
-  const [isDesktopForNotification, setIsDesktopForNotification] = useState(
-    typeof window !== 'undefined' && window.matchMedia('(min-width: 640px)').matches
-  )
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const mainContentElRef = useRef<Element | null>(null)
   const dispatch = useAppDispatch()
 
-  const DESKTOP_BREAKPOINT_PX = 1500
-  const NOTIFICATION_DESKTOP_BREAKPOINT_PX = 640
-  const MAIN_CONTENT_SELECTORS = ['main', '#content', '[role="main"]', '.main-content', '.content', 'article']
-
-  function findHostMainContent(): HTMLElement | null {
-    const container = document.getElementById('chatbot-widget-container')
-    for (const sel of MAIN_CONTENT_SELECTORS) {
-      const el = document.querySelector(sel)
-      if (el && el !== container && !container?.contains(el)) return el as HTMLElement
-    }
-    // Fallback: first direct child of body that isn't the widget (e.g. .container wrapper)
-    const first = document.body?.firstElementChild
-    if (first && first !== container && first.id !== 'chatbot-widget-container') return first as HTMLElement
-    return null
-  }
+  const isDesktopForNotification = useMediaQuery('(min-width: 640px)')
+  useChatWidgetOpen(isOpen)
+  useScrollToBottom(messagesEndRef, [messages.length, flow.state, flow.step])
 
   useImperativeHandle(ref, () => ({
     setIsOpen,
     startBookingFlow,
     startFlow(action: WidgetAction) {
       if (action === 'booking') startBookingFlow()
-      // 'chat' = just open, no specific flow
     },
   }))
 
-  // Auto-scroll to bottom when messages or flow changes
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
-    }
-  }, [messages, flow.state, flow.step])
-
-  // Listen for inactivity notification (30 seconds no events on host page)
   useEffect(() => {
     const handler = () => setShowInactivitySuggestion(true)
     window.addEventListener('chat-widget-inactivity', handler)
     return () => window.removeEventListener('chat-widget-inactivity', handler)
   }, [])
-
-  // Desktop vs mobile for notification (640px breakpoint)
-  useEffect(() => {
-    const mql = window.matchMedia(`(min-width: ${NOTIFICATION_DESKTOP_BREAKPOINT_PX}px)`)
-    const handler = () => setIsDesktopForNotification(mql.matches)
-    handler()
-    mql.addEventListener('change', handler)
-    return () => mql.removeEventListener('change', handler)
-  }, [])
-
-  // Sync open state to body and optionally shrink host main content (side-by-side on desktop)
-  useEffect(() => {
-    if (typeof document === 'undefined') return
-    const isDesktop = () => window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT_PX}px)`).matches
-
-    if (isOpen) {
-      document.body.setAttribute('data-chat-open', 'true')
-      window.dispatchEvent(new CustomEvent('chat-widget-open'))
-
-      if (isDesktop()) {
-        const candidate = findHostMainContent()
-        if (candidate) {
-          candidate.classList.add('chat-widget-main-shrink')
-          mainContentElRef.current = candidate
-        }
-      }
-    } else {
-      document.body.removeAttribute('data-chat-open')
-      window.dispatchEvent(new CustomEvent('chat-widget-close'))
-      if (mainContentElRef.current) {
-        mainContentElRef.current.classList.remove('chat-widget-main-shrink')
-        mainContentElRef.current = null
-      }
-    }
-
-    const mql = window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT_PX}px)`)
-    const handleChange = () => {
-      if (!isOpen) return
-      if (!mql.matches && mainContentElRef.current) {
-        mainContentElRef.current.classList.remove('chat-widget-main-shrink')
-        mainContentElRef.current = null
-      }
-      if (mql.matches && !mainContentElRef.current) {
-        const candidate = findHostMainContent()
-        if (candidate) {
-          candidate.classList.add('chat-widget-main-shrink')
-          mainContentElRef.current = candidate
-        }
-      }
-    }
-    mql.addEventListener('change', handleChange)
-
-    return () => {
-      document.body.removeAttribute('data-chat-open')
-      if (mainContentElRef.current) {
-        mainContentElRef.current.classList.remove('chat-widget-main-shrink')
-        mainContentElRef.current = null
-      }
-      mql.removeEventListener('change', handleChange)
-    }
-  }, [isOpen])
 
   async function handleSend() {
     if (!inputValue.trim()) return
@@ -156,7 +72,7 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
       timestamp: new Date(),
     }
 
-    setMessages((prev) => [...prev, userMessage])
+    dispatch(addMessage(userMessage))
     const messageText = inputValue
     setInputValue('')
     setIsLoading(true)
@@ -171,7 +87,7 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
       timestamp: new Date(),
     }
 
-    setMessages((prev) => [...prev, assistantMessage])
+    dispatch(addMessage(assistantMessage))
     setIsLoading(false)
 
     if (onSendMessage) {
@@ -238,7 +154,7 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
       timestamp: new Date(),
     }
 
-    setMessages((prev) => [...prev, userMessage])
+    dispatch(addMessage(userMessage))
     setIsLoading(true)
 
     // Check scenario when tag is clicked
@@ -251,7 +167,7 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
       timestamp: new Date(),
     }
 
-    setMessages((prev) => [...prev, assistantMessage])
+    dispatch(addMessage(assistantMessage))
     setIsLoading(false)
 
     if (onSendMessage) {
@@ -348,7 +264,7 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
       timestamp: new Date(),
     }
 
-    setMessages((prev) => [...prev, confirmationMessage])
+    dispatch(addMessage(confirmationMessage))
     setFlow({ state: 'idle' })
     setReservationData({})
   }

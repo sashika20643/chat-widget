@@ -1,4 +1,5 @@
 import { IconButton } from '@/components/ui/icon-button'
+import { TextContent } from '@/components/TextContent'
 import H100Icon from '@/assets/icons/H100 AI ICON.svg'
 import BookmarkCleanIcon from '@/assets/icons/Bookmark Clean Icon.svg'
 import ExpandIcon from '@/assets/icons/Expand Icon.svg'
@@ -15,14 +16,15 @@ function ChatWidgetButton({ onOpen }: ChatWidgetButtonProps) {
         icon={H100Icon}
         aria-label="H100 AI"
         onClick={onOpen}
-        className="h-58 w-58 lg:h-69 lg:w-69  shadow-lg hover:shadow-xl transition-all duration-200"
+        className="h-14 w-14 lg:h-16 lg:w-16  shadow-lg hover:shadow-xl transition-all duration-200"
       />
 
       {/* Chat Bubble */}
       <div className="flex items-center gap-2 sm:gap-3 bg-background px-3 sm:px-4 py-2 sm:py-3 rounded-full shadow-lg border border-icon border-dark">
-        <span className="text-xs sm:text-base text-foreground max-w-[200px] sm:max-w-[280px]">
+          <TextContent variant="textMedium" className="text-text-primary max-w-[200px] sm:max-w-[280px]">
+          
           Hi, I am your personal H100 furniture consultant.
-        </span>
+          </TextContent>
         <IconButton
           icon={BookmarkCleanIcon}
           aria-label="Bookmark"

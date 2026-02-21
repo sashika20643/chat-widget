@@ -41,6 +41,24 @@ export async function detectScenario(message: string): Promise<ScenarioResponse>
             text: "H100 is a premium furniture brand offering high-quality, stylish furniture pieces. We specialize in creating beautiful, functional spaces with our curated collection of furniture. How can I help you learn more?"
           }
         })
+      } else if (
+        lowerMessage.includes('product') ||
+        lowerMessage.includes('price') ||
+        lowerMessage.includes('inquiry')
+      ) {
+        // Product inquiry – text + product IDs; client will fetch objects and show grid
+        resolve({
+          scenario: null,
+          message: {
+            text: "Here are some products that might interest you:",
+            productIds: [
+              '06477bff-145a-4bb2-a926-21b59864ce28',
+              '7cf982ef-13d0-401e-9752-937078efb97f',
+              '5521da0e-8d07-42f1-83af-6e49c38cb168',
+              '346ee1b7-eb88-442b-9db5-4a97f71c80aa',
+            ],
+          },
+        })
       } else if (lowerMessage.includes('similar')) {
         // Similar designer objects – text + product image cards grid with hyperlinks
         resolve({

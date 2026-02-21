@@ -28,7 +28,7 @@ function WelcomeScreen({ onTagClick }: WelcomeScreenProps) {
 
         {/* Main Message */}
         <H1 className="text-foreground leading-relaxed">
-          Hi, I'm your personal H100 personal assistant.
+          Hi, I'm your personal <br/> H100 personal assistant.
         </H1>
 
         {/* Sub Message */}

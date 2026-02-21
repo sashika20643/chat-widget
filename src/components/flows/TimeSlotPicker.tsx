@@ -12,7 +12,7 @@ interface TimeSlotPickerProps {
 function TimeSlotPicker({ slots, pickedSlots = [], selectedTime, onTimeSelect }: TimeSlotPickerProps) {
   return (
     <ChatBubble variant="assistant" className="p-4">
-      <span className="font-medium text-base mb-5 block">Sure, Thursday, September 19 
+      <span className="text-sm lg:text-lg mb-5 block">Sure, Thursday, September 19 
 works very well, we'll have plenty 
 of time for you then! What time 
 suits you best?</span>
@@ -29,10 +29,10 @@ suits you best?</span>
               onClick={() => !isPicked && onTimeSelect(slot)}
               disabled={isPicked}
               className={cn(
-                "text-xs rounded-full max-w-[100px]",
+                "text-xs lg:text-lg rounded-full w-fit min-w-0 px-4 py-4",
                 !isPicked && !isSelected && "bg-[hsl(var(--primary))] text-primary-foreground hover:bg-[hsl(var(--primary))]/90",
                 isSelected && "bg-primary text-primary-foreground",
-                isPicked && "time-slot-picked bg-secondary text-primary-foreground" 
+                isPicked && "time-slot-picked bg-secondary text-secondary-foreground" 
               )}
             >
               {slot}

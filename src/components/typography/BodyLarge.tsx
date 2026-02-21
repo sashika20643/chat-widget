@@ -8,7 +8,7 @@ export interface BodyLargeProps extends React.HTMLAttributes<HTMLElement> {
 export function BodyLarge({ className, as: Comp = 'p', ...props }: BodyLargeProps) {
   return (
     <Comp
-      className={cn('text-xl lg:text-[23px] font-medium', className)}
+      className={cn('text-xl lg:text-[22px] font-medium', className)}
       {...props}
     />
   )

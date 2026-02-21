@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/shadCN/button'
 import { ChatBubble } from '@/components/ui/chat-bubble'
+import { ProductGrid } from '@/components/ProductGrid'
 import { cn } from '@/utils/utils'
 import type { Message as MessageType, MessageContent } from '@/types/chat'
 
@@ -44,6 +45,11 @@ function Message({ message, onButtonClick }: MessageProps) {
               />
             ))}
           </div>
+        )}
+
+        {/* Product grid from object IDs (fetch objects API, show skeleton then grid) */}
+        {content.productIds && content.productIds.length > 0 && (
+          <ProductGrid productIds={content.productIds} />
         )}
 
         {/* Product cards: small grid with hyperlinks */}

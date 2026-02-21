@@ -21,6 +21,8 @@ export interface MessageContent {
   images?: MessageImage[]
   /** Product image cards in a grid (image + hyperlink) */
   productCards?: MessageProductCard[]
+  /** Product object FCA IDs – fetch details from objects API and show grid */
+  productIds?: string[]
   buttons?: MessageButton[]
 }
 

@@ -8,7 +8,10 @@ module.exports = {
   theme: {
   	extend: {
   		fontFamily: {
-  			sans: ['Helvetica Neue', 'Helvetica Now', 'Helvetica', 'Arial', 'sans-serif'],
+  			sans: ['"Helvetica Neue"', 'Helvetica Now', 'Helvetica', 'Arial', 'sans-serif'],
+  		},
+  		fontWeight: {
+  			medium: '500',
   		},
   		spacing: {
   			'35': '35px',  /* Send button height */
@@ -31,7 +34,11 @@ module.exports = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
-  			background: 'hsl(var(--background))',
+  			background: {
+  				DEFAULT: 'hsl(var(--background))',
+  				base: '#ffffff',
+  				dark: '#000000',
+  			},
   			foreground: 'hsl(var(--foreground))',
   			card: {
   				DEFAULT: 'hsl(var(--card))',
@@ -61,10 +68,21 @@ module.exports = {
   				DEFAULT: 'hsl(var(--destructive))',
   				foreground: 'hsl(var(--destructive-foreground))'
   			},
-  			border: 'hsl(var(--border))',
+  			border: {
+  				DEFAULT: '#1d1d1b',
+  			},
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
   			dark: 'var(--color-border-strong)',
+  			brand: {
+  				primary: '#439143',
+  				secondary: '#ef791e',
+  			},
+  			text: {
+  				primary: '#222222',
+  				muted: '#b3b3b3',
+  				inverse: '#ffffff',
+  			},
   			shiki: {
   				light: 'var(--shiki-light)',
   				'light-bg': 'var(--shiki-light-bg)',
