@@ -1,4 +1,86 @@
-import type { ScenarioResponse } from '@/types/chat'
+import type { ScenarioResponse, MessageContent } from '@/types/chat'
+
+const CHAT_API_BASE_URL =
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_CHAT_API_BASE_URL) ||
+  'https://getagent-chat-agent.ceilu9.easypanel.host'
+
+export interface AppointmentData {
+  appointment_id: string
+  date: string
+  time: string
+}
+
+export interface ChatRequest {
+  user_id: string
+  message: string
+  thread_id?: string
+  message_type?: 'user' | 'system'
+  appointment_data?: AppointmentData | null
+}
+
+export interface ChatResponse {
+  thread_id: string
+  message: string
+  action: string
+  product_ids?: string[]
+  is_on_topic?: boolean
+  language?: string
+  customer?: { name: string; tier: string }
+}
+
+/** POST /api/chat – send message and get assistant response. */
+export async function sendChatMessage(
+  userId: string,
+  message: string,
+  threadId?: string | null
+): Promise<ChatResponse> {
+  const body: ChatRequest = {
+    user_id: userId,
+    message,
+    message_type: 'user',
+  }
+  if (threadId) body.thread_id = threadId
+
+  const res = await fetch(`${CHAT_API_BASE_URL}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) throw new Error(`Chat API error: ${res.status}`)
+  return res.json()
+}
+
+/** POST /api/chat – send system message with appointment summary (e.g. after booking). */
+export async function sendAppointmentConfirmation(
+  userId: string,
+  threadId: string | null | undefined,
+  appointmentData: AppointmentData
+): Promise<ChatResponse> {
+  const body: ChatRequest = {
+    user_id: userId,
+    message: 'Appointment confirmed',
+    message_type: 'system',
+    appointment_data: appointmentData,
+  }
+  if (threadId) body.thread_id = threadId
+
+  const res = await fetch(`${CHAT_API_BASE_URL}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) throw new Error(`Chat API error: ${res.status}`)
+  return res.json()
+}
+
+/** Map ChatResponse to MessageContent for the UI. */
+export function chatResponseToMessageContent(res: ChatResponse): MessageContent {
+  const content: MessageContent = { text: res.message || '' }
+  if (res.product_ids && res.product_ids.length > 0) {
+    content.productIds = res.product_ids
+  }
+  return content
+}
 
 export async function detectScenario(message: string): Promise<ScenarioResponse> {
   // Dummy API call - replace with actual API later

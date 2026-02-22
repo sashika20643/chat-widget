@@ -1,4 +1,5 @@
 const OBJECTS_API_URL =
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_OBJECTS_API_URL) ||
   'https://getbutik-getbutik-db-service.ceilu9.easypanel.host/api/chat_bot/objects'
 
 export interface ChatBotObject {

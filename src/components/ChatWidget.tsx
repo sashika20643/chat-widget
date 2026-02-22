@@ -9,11 +9,13 @@ import ChatWidgetButton from '@/components/ChatWidgetButton'
 import ChatInputBar from '@/components/ChatInputBar'
 import ReservationFlow from '@/components/flows/ReservationFlow'
 import WelcomeScreen from '@/components/WelcomeScreen'
-import { detectScenario, getAvailableTimeSlots, submitReservation } from '@/services/chatApi'
+import { sendChatMessage, chatResponseToMessageContent, sendAppointmentConfirmation, detectScenario, getAvailableTimeSlots, submitReservation } from '@/services/chatApi'
+import { getOrCreateUserId } from '@/utils/userId'
+import { convertUtcToLocalTime } from '@/utils/timeSlotUtils'
 import { createCalendarEvent } from '@/services/calendarApi'
 import { useAppDispatch } from '@/store/hooks'
 import { fetchCalendarEventsAsync } from '@/store/slices/calendarEventsSlice'
-import { addMessage } from '@/store/slices/chatSlice'
+import { addMessage, setMessages } from '@/store/slices/chatSlice'
 import { useChatMessages, useChatWidgetOpen, useMediaQuery, useScrollToBottom } from '@/hooks'
 import H100Icon from '@/assets/icons/H100 AI ICON.svg'
 import HelpIcon from '@/assets/icons/Help Icon.svg'
@@ -38,6 +40,7 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
   const [isOpen, setIsOpen] = useState(false)
   const [flow, setFlow] = useState<ConversationFlow>({ state: 'idle' })
   const [reservationData, setReservationData] = useState<ReservationData>({})
+  const [threadId, setThreadId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [showInactivitySuggestion, setShowInactivitySuggestion] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -77,22 +80,36 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
     setInputValue('')
     setIsLoading(true)
 
-    // Check scenario when send button is clicked
-    const response = await detectScenario(messageText)
-    
-    const assistantMessage: MessageType = {
-      id: (Date.now() + 1).toString(),
-      content: response.message,
-      role: 'assistant',
-      timestamp: new Date(),
+    const userId = getOrCreateUserId()
+    try {
+      const response = await sendChatMessage(userId, messageText, threadId)
+      setThreadId(response.thread_id ?? null)
+      let content = chatResponseToMessageContent(response)
+      if (response.action?.toLowerCase() === 'appointment') {
+        content = {
+          ...content,
+          buttons: [{ label: 'Book an appointment', onClick: startBookingFlow, variant: 'black' }],
+        }
+      }
+      const assistantMessage: MessageType = {
+        id: (Date.now() + 1).toString(),
+        content,
+        role: 'assistant',
+        timestamp: new Date(),
+      }
+      dispatch(addMessage(assistantMessage))
+    } catch {
+      const response = await detectScenario(messageText)
+      const assistantMessage: MessageType = {
+        id: (Date.now() + 1).toString(),
+        content: response.message,
+        role: 'assistant',
+        timestamp: new Date(),
+      }
+      dispatch(addMessage(assistantMessage))
     }
-
-    dispatch(addMessage(assistantMessage))
     setIsLoading(false)
-
-    if (onSendMessage) {
-      onSendMessage(messageText)
-    }
+    if (onSendMessage) onSendMessage(messageText)
   }
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -157,22 +174,36 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
     dispatch(addMessage(userMessage))
     setIsLoading(true)
 
-    // Check scenario when tag is clicked
-    const response = await detectScenario(tag)
-    
-    const assistantMessage: MessageType = {
-      id: (Date.now() + 1).toString(),
-      content: response.message,
-      role: 'assistant',
-      timestamp: new Date(),
+    const userId = getOrCreateUserId()
+    try {
+      const response = await sendChatMessage(userId, tag, threadId)
+      setThreadId(response.thread_id ?? null)
+      let content = chatResponseToMessageContent(response)
+      if (response.action?.toLowerCase() === 'appointment') {
+        content = {
+          ...content,
+          buttons: [{ label: 'Book an appointment', onClick: startBookingFlow, variant: 'black' }],
+        }
+      }
+      const assistantMessage: MessageType = {
+        id: (Date.now() + 1).toString(),
+        content,
+        role: 'assistant',
+        timestamp: new Date(),
+      }
+      dispatch(addMessage(assistantMessage))
+    } catch {
+      const response = await detectScenario(tag)
+      const assistantMessage: MessageType = {
+        id: (Date.now() + 1).toString(),
+        content: response.message,
+        role: 'assistant',
+        timestamp: new Date(),
+      }
+      dispatch(addMessage(assistantMessage))
     }
-
-    dispatch(addMessage(assistantMessage))
     setIsLoading(false)
-
-    if (onSendMessage) {
-      onSendMessage(tag)
-    }
+    if (onSendMessage) onSendMessage(tag)
   }
 
   async function handleDateSelect(date: Date) {
@@ -255,15 +286,35 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
       userDetails: details
     })
 
+    const selectedDate = reservationData.selectedDate
+    const selectedTime = reservationData.selectedTime
+    const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`
+    const timeStr = convertUtcToLocalTime(selectedTime, selectedDate)
+    const appointmentId = `APT-${Date.now()}`
+
+    if (messages.length > 0) {
+      dispatch(setMessages(messages.slice(0, -1)))
+    }
+
+    const userId = getOrCreateUserId()
+    let content: MessageType['content']
+    try {
+      const chatResponse = await sendAppointmentConfirmation(userId, threadId, {
+        appointment_id: appointmentId,
+        date: dateStr,
+        time: timeStr,
+      })
+      content = chatResponseToMessageContent(chatResponse)
+    } catch (err) {
+      console.error('[ChatWidget] Failed to send appointment to chat:', err)
+      content = { text: result.message }
+    }
     const confirmationMessage: MessageType = {
       id: Date.now().toString(),
-      content: {
-        text: result.message
-      },
+      content,
       role: 'assistant',
       timestamp: new Date(),
     }
-
     dispatch(addMessage(confirmationMessage))
     setFlow({ state: 'idle' })
     setReservationData({})

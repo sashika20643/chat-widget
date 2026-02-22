@@ -2,20 +2,25 @@ import { Button } from '@/components/ui/shadCN/button'
 import { ChatBubble } from '@/components/ui/chat-bubble'
 import { cn } from '@/utils/utils'
 
+function formatSelectedDate(date: Date): string {
+  return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+}
+
 interface TimeSlotPickerProps {
   slots: string[]
   pickedSlots?: string[]
   selectedTime?: string
+  selectedDate: Date
   onTimeSelect: (time: string) => void
 }
 
-function TimeSlotPicker({ slots, pickedSlots = [], selectedTime, onTimeSelect }: TimeSlotPickerProps) {
+function TimeSlotPicker({ slots, pickedSlots = [], selectedTime, selectedDate, onTimeSelect }: TimeSlotPickerProps) {
+  const dateLabel = formatSelectedDate(selectedDate)
   return (
     <ChatBubble variant="assistant" className="p-4">
-      <span className="text-sm lg:text-lg mb-5 block">Sure, Thursday, September 19 
-works very well, we'll have plenty 
-of time for you then! What time 
-suits you best?</span>
+      <span className="text-sm lg:text-lg mb-5 block">
+        Sure, {dateLabel} works very well, we'll have plenty of time for you then! What time suits you best?
+      </span>
       <div className="grid grid-cols-4 gap-2">
         {slots.map((slot) => {
           const isSelected = selectedTime === slot

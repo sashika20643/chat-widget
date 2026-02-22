@@ -54,6 +54,7 @@ function ReservationFlow({
         slots={localSlots}
         pickedSlots={bookedLocalSlots}
         selectedTime={selectedLocalTime}
+        selectedDate={data.selectedDate}
         onTimeSelect={(localTime) => {
           // Convert local time back to UTC for storage/API
           if (data.selectedDate) {
