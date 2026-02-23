@@ -50,6 +50,36 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
   useChatWidgetOpen(isOpen)
   useScrollToBottom(messagesEndRef, [messages.length, flow.state, flow.step])
 
+  // When opening the widget with existing messages, jump to the end immediately.
+  useEffect(() => {
+    if (!isOpen) return
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto', block: 'end' })
+      })
+    })
+  }, [isOpen])
+
+  const startBookingFlow = () => {
+    console.log('[ChatWidget] Starting booking flow')
+
+    const today = new Date()
+    const startDate = new Date(today.getFullYear(), today.getMonth(), 1)
+    const endDate = new Date(today.getFullYear(), today.getMonth() + 2, 0, 23, 59, 59)
+
+    const startDateISO = startDate.toISOString()
+    const endDateISO = endDate.toISOString()
+
+    console.log('[ChatWidget] Date range:', { startDate: startDateISO, endDate: endDateISO })
+
+    dispatch(fetchCalendarEventsAsync({ startDate: startDateISO, endDate: endDateISO }))
+
+    setFlow({
+      state: 'reservation_flow',
+      step: 'select_date'
+    })
+  }
+
   useImperativeHandle(ref, () => ({
     setIsOpen,
     startBookingFlow,
@@ -126,26 +156,6 @@ const ChatWidget = forwardRef<ChatWidgetRef, ChatWidgetProps>(({
 
   function handleOpen() {
     setIsOpen(true)
-  }
-
-  function startBookingFlow() {
-    console.log('[ChatWidget] Starting booking flow')
-      
-      const today = new Date()
-      const startDate = new Date(today.getFullYear(), today.getMonth(), 1)
-      const endDate = new Date(today.getFullYear(), today.getMonth() + 2, 0, 23, 59, 59)
-      
-      const startDateISO = startDate.toISOString()
-      const endDateISO = endDate.toISOString()
-      
-      console.log('[ChatWidget] Date range:', { startDate: startDateISO, endDate: endDateISO })
-      
-      dispatch(fetchCalendarEventsAsync({ startDate: startDateISO, endDate: endDateISO }))
-      
-      setFlow({
-        state: 'reservation_flow',
-        step: 'select_date'
-      })
   }
 
   function handleButtonClick(action: string) {
