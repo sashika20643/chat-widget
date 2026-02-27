@@ -39,17 +39,17 @@ function ChatInputBar({
   }
 
   return (
-    <div className="p-4 sm:p-5 flex-shrink-0">
-      <div className="flex items-end gap-2 sm:gap-3">
+    <div className="p-4 lg:p-5 flex-shrink-0">
+      <div className="flex items-end gap-2 lg:gap-2">
         {/* Mobile: + only; tap to show Gallery, AR, Camera. Desktop: always show three icons */}
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           {/* Mobile: + button; tap to show vertical popup with three icons */}
-          <div className="relative flex sm:hidden items-center">
+          <div className="relative flex lg:hidden items-center">
             <IconButton
-              icon={<Plus className="h-8 w-8" />}
+              icon={<Plus className="h-12 w-12" />}
               aria-label="Show more options"
-              size="sm"
-              className="h-10 w-10 border border-border bg-transparent hover:bg-transparent active:bg-transparent"
+              size="mlarge"
+              className="border border-border bg-transparent hover:bg-transparent active:bg-transparent [&_svg]:h-6 [&_svg]:w-6"
               onClick={() => setMobileIconsOpen((open) => !open)}
             />
             {mobileIconsOpen && (
@@ -63,7 +63,6 @@ function ChatInputBar({
                     icon={<X className="h-5 w-5" />}
                     aria-label="Close"
                     size="sm"
-                    className="h-9 w-9"
                     onClick={() => setMobileIconsOpen(false)}
                   />
                 </div>
@@ -72,21 +71,18 @@ function ChatInputBar({
                     icon={GalleryIcon}
                     aria-label="Gallery"
                     size="sm"
-                    className="h-10 w-10"
                     onClick={() => setMobileIconsOpen(false)}
                   />
                   <IconButton
                     icon={ARIcon}
                     aria-label="AR"
                     size="sm"
-                    className="h-10 w-10"
                     onClick={() => setMobileIconsOpen(false)}
                   />
                   <IconButton
                     icon={CameraIcon}
                     aria-label="Camera"
                     size="sm"
-                    className="h-10 w-10"
                     onClick={() => setMobileIconsOpen(false)}
                   />
                 </div>
@@ -94,30 +90,27 @@ function ChatInputBar({
             )}
           </div>
           {/* Desktop: always show three icons */}
-          <div className="hidden sm:flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-2">
             <IconButton
               icon={GalleryIcon}
               aria-label="Gallery"
               size="sm"
-              className="h-10 w-10 sm:h-12 sm:w-12"
             />
             <IconButton
               icon={ARIcon}
               aria-label="AR"
               size="sm"
-              className="h-10 w-10 sm:h-12 sm:w-12"
             />
             <IconButton
               icon={CameraIcon}
               aria-label="Camera"
               size="sm"
-              className="h-10 w-10 sm:h-12 sm:w-12"
             />
           </div>
         </div>
 
         {/* Input box + Send: grows with content up to 40vh, then scrollable */}
-        <div className="flex flex-1 min-w-0 min-h-[55px] items-end border border-[#000000] rounded-3xl sm:rounded-[28px] overflow-hidden px-[10.5px] items-center">
+        <div className="flex flex-1 min-w-0 min-h-[50px] items-end border border-[#000000] rounded-[28px] overflow-hidden px-[10.5px] items-center">
           <textarea
             ref={textareaRef}
             value={value}

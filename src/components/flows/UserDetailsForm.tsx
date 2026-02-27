@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/shadCN/button'
 import { Input } from '@/components/ui/shadCN/input'
 import { ChatBubble } from '@/components/ui/chat-bubble'
+import { TextContent } from '@/components/TextContent'
 import { cn } from '@/utils/utils'
 
 interface UserDetailsFormProps {
@@ -25,9 +26,9 @@ function UserDetailsForm({ onSubmit }: UserDetailsFormProps) {
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <ChatBubble variant="assistant" className="p-4 rounded-3xl">
-      <p className="text-sm sm:text-base text-foreground mb-4">
+      <TextContent variant="textMedium" className="text-foreground mb-4">
         Now we just need your contact details. We will only use your data to communicate about the appointment :)
-      </p>
+      </TextContent>
       
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
@@ -78,8 +79,10 @@ function UserDetailsForm({ onSubmit }: UserDetailsFormProps) {
         />
       </div>
 
-      <Button type="submit" variant="black" size="sm" className="mt-4 rounded-full" disabled={!firstName || !lastName || !email || !phone}>
-        Done
+      <Button type="submit" variant="black" size="sm" className="mt-4 rounded-full px-4 py-3" disabled={!firstName || !lastName || !email || !phone}>
+        <TextContent variant="buttonText" className="text-text-inverse">
+          Done
+        </TextContent>
       </Button>
       </ChatBubble>
     </form>

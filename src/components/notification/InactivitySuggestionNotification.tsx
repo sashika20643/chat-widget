@@ -90,7 +90,6 @@ export function InactivitySuggestionNotification({
             {!displayedText && <span className="invisible">{message}</span>}
           </p>
 
-          {/* Green CTA button - opens chat */}
           <button
             type="button"
             onClick={onAction}
@@ -100,7 +99,6 @@ export function InactivitySuggestionNotification({
             <ChevronRight className="h-5 w-5" />
           </button>
 
-          {/* Optional thumbnails grid (2x3) */}
           {thumbnailUrls.length > 0 && (
             <div className="mt-4 grid grid-cols-3 gap-2">
               {thumbnailUrls.slice(0, 6).map((url, i) => (

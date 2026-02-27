@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/shadCN/button'
-import { BodyLarge, H1 } from '@/components/typography'
+import { TextContent } from '@/components/TextContent'
 import H100Icon from '@/assets/icons/H100 AI ICON.svg'
 
 interface WelcomeScreenProps {
@@ -22,31 +22,34 @@ function WelcomeScreen({ onTagClick }: WelcomeScreenProps) {
           <img 
             src={H100Icon} 
             alt="H100 AI" 
-            className="h-16 w-16 sm:h-20 sm:w-20 object-contain"
+            className="h-16 w-16 lg:h-[94px] lg:w-[94px] object-contain"
           />
         </div>
 
         {/* Main Message */}
-        <H1 className="text-foreground leading-relaxed">
-          Hi, I'm your personal <br/> H100 personal assistant.
-        </H1>
+        <TextContent variant="textLarge" className="text-foreground leading-relaxed">
+          Hi, I'm your personal <br /> H100 personal assistant.
+        </TextContent>
 
         {/* Sub Message */}
-        <BodyLarge className="text-muted-foreground">
+        <TextContent variant="textMedium"  className="text-muted-foreground">
           Please state your request
-        </BodyLarge>
+        </TextContent>
 
         {/* Tags */}
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 w-full mt-4">
+        <div className="flex flex-wrap items-center justify-center gap-2 lg:gap-3 w-full mt-4">
           {tags.map((tag) => (
             <Button
               key={tag}
               variant="outline"
               size="sm"
               onClick={() => onTagClick(tag)}
-              className="text-sm lg:text-base px-3 sm:px-4 py-1.5 sm:py-2 rounded-full lg:rounded-3xl border border-[hsl(var(--tertiary))] hover:bg-[hsl(var(--gray-50))]"
+              className=" px-3.5 lg:px-4 py-3 lg:py-3 rounded-full rounded-17px lg:rounded-[20px] border border-[hsl(var(--tertiary))] hover:bg-[hsl(var(--gray-50))]"
             >
+                      <TextContent variant="textMedium" >
+
               {tag}
+              </TextContent>
             </Button>
           ))}
         </div>

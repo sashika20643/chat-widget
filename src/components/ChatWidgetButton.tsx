@@ -10,31 +10,34 @@ interface ChatWidgetButtonProps {
 
 function ChatWidgetButton({ onOpen }: ChatWidgetButtonProps) {
   return (
-    <div className="fixed bottom-4 left-1 right-1 sm:left-auto sm:right-4 z-50 flex flex-row sm:flex-row items-end sm:items-center gap-3">
+    <div className="fixed bottom-6 left-1 right-1 sm:left-auto sm:right-4 z-50 flex flex-row sm:flex-row items-end sm:items-center gap-3">
       {/* Main Floating Button */}
       <IconButton
         icon={H100Icon}
         aria-label="H100 AI"
+        size="xl"
         onClick={onOpen}
-        className="h-14 w-14 lg:h-16 lg:w-16  shadow-lg hover:shadow-xl transition-all duration-200"
+        className="shadow-lg hover:shadow-xl transition-all duration-200"
       />
 
       {/* Chat Bubble */}
-      <div className="flex items-center gap-2 sm:gap-3 bg-background px-3 sm:px-4 py-2 sm:py-3 rounded-full shadow-lg border border-icon border-dark">
-          <TextContent variant="textMedium" className="text-text-primary max-w-[200px] sm:max-w-[280px]">
+      <div className="flex items-center gap-1 lg:gap-3 bg-background pl-4 pr-3 lg:pl-6 lg:pr-4 py-2 lg:py-3 rounded-full shadow-lg border border-icon border-dark">
+          <TextContent variant="textMedium" className="text-text-primary max-w-[200px] lg:max-w-[280px] ">
           
           Hi, I am your personal H100 furniture consultant.
           </TextContent>
         <IconButton
           icon={BookmarkCleanIcon}
           aria-label="Bookmark"
-          className="h-8 w-8 sm:h-37 sm:w-37 bg-background flex-shrink-0"
+          size="bubble"
+          className="bg-background flex-shrink-0"
         />
         <IconButton
           icon={ExpandIcon}
           aria-label="Expand chat"
+          size="bubble"
           onClick={onOpen}
-          className="h-8 w-8 sm:h-37 sm:w-37 bg-background hover:shadow-xl flex-shrink-0"
+          className="bg-background hover:shadow-xl flex-shrink-0"
         />
       </div>
     </div>

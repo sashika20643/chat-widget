@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/shadCN/button'
 import { ChatBubble } from '@/components/ui/chat-bubble'
 import { ProductGrid } from '@/components/ProductGrid'
+import { TextContent } from '@/components/TextContent'
 import { cn } from '@/utils/utils'
 import type { Message as MessageType, MessageContent } from '@/types/chat'
 
@@ -24,13 +25,16 @@ function Message({ message, onButtonClick }: MessageProps) {
     >
       <ChatBubble
         variant={isUser ? 'user' : 'assistant'}
-        className="min-w-[80px] sm:min-w-[100px] max-w-[80%] sm:max-w-[80%] w-fit"
+        className="max-w-[80%] sm:max-w-[80%] w-fit"
       >
         {/* Text Content */}
         {content.text && (
-          <p className="text-sm sm:text-base whitespace-pre-wrap break-words overflow-wrap-anywhere word-break-break-word leading-7">
+          <TextContent
+            variant="textMedium"
+            className="whitespace-pre-wrap break-words overflow-wrap-anywhere"
+          >
             {content.text}
-          </p>
+          </TextContent>
         )}
 
         {/* Images */}
@@ -82,7 +86,7 @@ function Message({ message, onButtonClick }: MessageProps) {
                 key={index}
                 variant={button.variant || 'outline'}
                 size="sm"
-                className="rounded-full px-4"
+                className="rounded-full px-4 py-3"
                 onClick={() => {
                   button.onClick()
                   if (onButtonClick) {
@@ -90,7 +94,9 @@ function Message({ message, onButtonClick }: MessageProps) {
                   }
                 }}
               >
-                {button.label}
+                <TextContent variant="buttonText" className="text-text-inverse">
+                  {button.label}
+                </TextContent>
               </Button>
             ))}
           </div>
