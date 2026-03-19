@@ -18,7 +18,7 @@ export function FilePreview({ file, className }: FilePreviewProps) {
   return (
     <div
       className={cn(
-        'flex items-center gap-2 rounded-md border border-[hsl(var(--tertiary))] bg-background px-3 py-2 text-sm',
+        'flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm',
         className
       )}
     >

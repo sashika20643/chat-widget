@@ -5,6 +5,13 @@ import { cn } from '@/utils/utils'
 const DEFAULT_MESSAGE = 'For this Chair I have further recommendations!'
 const TYPING_INTERVAL_MS = 35
 
+const NOTIFICATION_BUTTONS = [
+  { id: 'support_chat', label: '📞 Support Chat' },
+  { id: 'shipping_info', label: '🚚 Shipping Info' },
+  { id: 'price_info', label: '💰 Price Info' },
+  { id: 'product_enquiry', label: '📦 Continue to product enquiry' },
+] as const
+
 interface InactivitySuggestionNotificationProps {
   visible: boolean
   onDismiss: () => void
@@ -14,6 +21,8 @@ interface InactivitySuggestionNotificationProps {
   thumbnailUrls?: string[]
   /** Desktop = top-left popup with typing; Mobile = in bottom panel with pulse */
   variant: 'desktop' | 'mobile'
+  /** Called when a notification button is clicked (before onAction). Use to e.g. send a message into chat. */
+  onNotificationButtonClick?: (actionId: string) => void
 }
 
 function useTypingAnimation(fullText: string, enabled: boolean) {
@@ -51,7 +60,12 @@ export function InactivitySuggestionNotification({
   message = DEFAULT_MESSAGE,
   thumbnailUrls = [],
   variant,
+  onNotificationButtonClick,
 }: InactivitySuggestionNotificationProps) {
+  function handleNotificationButtonClick(actionId: string) {
+    onNotificationButtonClick?.(actionId)
+    onAction()
+  }
   const [animationStarted, setAnimationStarted] = useState(false)
   const { displayedText } = useTypingAnimation(message, visible && variant === 'desktop' && animationStarted)
 
@@ -99,6 +113,23 @@ export function InactivitySuggestionNotification({
             <ChevronRight className="h-5 w-5" />
           </button>
 
+          {/* Action buttons */}
+          <div className="mt-4 flex flex-wrap gap-2">
+            {NOTIFICATION_BUTTONS.map((btn) => (
+              <button
+                key={btn.id}
+                type="button"
+                onClick={() => handleNotificationButtonClick(btn.id)}
+                className={cn(
+                  'rounded-full border border-border bg-background px-3 py-2 text-sm font-medium text-foreground',
+                  'hover:bg-muted transition-colors'
+                )}
+              >
+                {btn.label}
+              </button>
+            ))}
+          </div>
+
           {thumbnailUrls.length > 0 && (
             <div className="mt-4 grid grid-cols-3 gap-2">
               {thumbnailUrls.slice(0, 6).map((url, i) => (
@@ -140,9 +171,26 @@ export function InactivitySuggestionNotification({
       >
         <X className="h-5 w-5" />
       </button>
-      <p className="min-w-0 flex-1 text-base font-medium text-foreground line-clamp-2 leading-snug">
-        {message}
-      </p>
+      <div className="min-w-0 flex-1 space-y-3">
+        <p className="text-base font-medium text-foreground line-clamp-2 leading-snug">
+          {message}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {NOTIFICATION_BUTTONS.map((btn) => (
+            <button
+              key={btn.id}
+              type="button"
+              onClick={() => handleNotificationButtonClick(btn.id)}
+              className={cn(
+                'rounded-full border border-border bg-background px-3 py-2 text-xs font-medium text-foreground',
+                'hover:bg-muted transition-colors'
+              )}
+            >
+              {btn.label}
+            </button>
+          ))}
+        </div>
+      </div>
       <button
         type="button"
         onClick={onAction}

@@ -8,7 +8,7 @@ export type IconButtonSize =
   | "bubble"
 
 const iconButtonSizeClasses: Record<IconButtonSize, string> = {
-  default: "h-37 w-37 lg:h-44 lg:w-44",
+  default: "h-30 w-30 lg:h-35 lg:w-35",
   sm: "h-10 w-10 lg:h-11 lg:w-11",
   lg: "h-10 w-10",
   icon: "h-9 w-9",

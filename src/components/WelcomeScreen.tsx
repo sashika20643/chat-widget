@@ -8,10 +8,10 @@ interface WelcomeScreenProps {
 
 function WelcomeScreen({ onTagClick }: WelcomeScreenProps) {
   const tags = [
-    'Furniture scanning',
-    'About H100',
-    'Gastro',
-    'My Perfect Furniture'
+    '📸🪑Take Photo',
+    '🖼️🪑Upload Image',
+    '🤝B2B Project',
+    '🎨Furniture Consultation'
   ]
 
   return (
@@ -22,7 +22,7 @@ function WelcomeScreen({ onTagClick }: WelcomeScreenProps) {
           <img 
             src={H100Icon} 
             alt="H100 AI" 
-            className="h-16 w-16 lg:h-[94px] lg:w-[94px] object-contain"
+            className="h-16 w-16 lg:h-[66px] lg:w-[66px] object-contain"
           />
         </div>
 
@@ -44,7 +44,7 @@ function WelcomeScreen({ onTagClick }: WelcomeScreenProps) {
               variant="outline"
               size="sm"
               onClick={() => onTagClick(tag)}
-              className=" px-3.5 lg:px-4 py-3 lg:py-3 rounded-full rounded-17px lg:rounded-[20px] border border-[hsl(var(--tertiary))] hover:bg-[hsl(var(--gray-50))]"
+              className=" px-3.5 lg:px-4 py-3 lg:py-3 rounded-full rounded-17px lg:rounded-[20px] border border-border hover:bg-[hsl(var(--gray-50))]"
             >
                       <TextContent variant="textMedium" >
 

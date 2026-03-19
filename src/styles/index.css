@@ -58,8 +58,8 @@
     --destructive-foreground: 0 0% 98%; /* Text on destructive background */
     
     /* Border and input colors */
-    --border: 116 15% 85%; /* Border color (light gray-green) */
-    --input: 116 15% 85%; /* Input border color */
+    --border: 60 6% 11%; /* Border color (#1d1d1b) */
+    --input: 60 6% 11%; /* Input border color (#1d1d1b) */
     --ring: 116 32% 71%; /* Focus ring color (matches primary) */
     
     /* Border radius */
@@ -120,8 +120,8 @@
     --destructive-foreground: 0 0% 98%; /* Text on destructive background */
     
     /* Border and input colors - Dark mode variants */
-    --border: 0 0% 20%; /* Border color (dark gray) */
-    --input: 0 0% 20%; /* Input border color */
+    --border: 60 6% 11%; /* Border color (#1d1d1b) */
+    --input: 60 6% 11%; /* Input border color (#1d1d1b) */
     --ring: 116 32% 71%; /* Focus ring color */
     
     /* Tertiary colors - Dark mode variants (inverted from light mode) */
@@ -165,32 +165,24 @@
     position: relative;
     padding: 23px;
     background-color: var(--color-surface) !important;
-    border: solid 1px var(--color-border-strong);
-    border-radius: 1.5em;
+    border: solid 0.85px #1d1d1b;
+    border-radius: 31px;
     overflow: visible;
   }
 
   .chat-bubble-assistant .tail {
     position: absolute;
-    bottom: -13px;
-    left: 17px;
-    width: 0;
-    height: 0;
-    border-left: 27px solid var(--color-border-strong);
-    border-top: 0 solid transparent;
-    border-bottom: 14px solid transparent;
+    bottom: -24px;
+    left: 15px;
+    width: 20px;
+    height: 30px;
+    background-image: url("../assets/icons/Chatbubble Pointer.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
   }
 
   .chat-bubble-assistant .tail2 {
-    position: absolute;
-    bottom: -12px;
-    left: 19px;
-    width: 0;
-    height: 0;
-    border-left: 25px solid var(--color-surface);
-    border-top: 0 solid transparent;
-    border-bottom: 15px solid transparent;
-    transform: translateX(-1px);
+    display: none;
   }
 
   /* Chat bubble with tail for user messages (same as assistant: white bg, black text) */
@@ -200,40 +192,32 @@
     padding: 23px;
     background-color: var(--color-surface) !important;
     color: var(--color-border-strong);
-    border: solid 1px var(--color-border-strong);
+    border: solid 0.85px #1d1d1b;
     border-radius: 1.5em;
     overflow: visible;
   }
 
   .chat-bubble-user .tail {
     position: absolute;
-    bottom: -14px;
-    right: 17px;
-    width: 0;
-    height: 0;
-    border-left: 27px solid var(--color-border-strong);
-    border-top: 0 solid transparent;
-    border-bottom: 14px solid transparent;
+    bottom: -24px;;
+    right: 15px;
+    width: 20px;
+    height: 30px;
+    background-image: url("../assets/icons/Chatbubble Pointer.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
     transform: scaleX(-1);
   }
 
   .chat-bubble-user .tail2 {
-    position: absolute;
-    bottom: -13px;
-    right: 17px;
-    width: 0;
-    height: 0;
-    border-left: 25px solid var(--color-surface);
-    border-top: 0 solid transparent;
-    border-bottom: 15px solid transparent;
-    transform: scaleX(-1) translateX(1px);
+    display: none;
   }
   
   /* Time slot picker - Disabled/picked state styling */
   .time-slot-picked {
     background-color: hsl(var(--gray-300)); /* Light gray background for unavailable slots */
     color: hsl(var(--gray-600)); /* Medium gray text */
-    border-color: hsl(var(--gray-400)); /* Medium-light gray border */
+    border-color: hsl(var(--border)); /* Standard border color */
     cursor: not-allowed;
   }
   
@@ -241,14 +225,16 @@
   .time-slot-picked:hover {
     background-color: var(--color-accent);
     color: var(--color-surface);
-    border-color: var(--color-accent);
+    border-color: hsl(var(--border));
   }
 }
 
-/* Host page: shrink main content when chat is open on desktop (side-by-side) */
-@media (min-width: 1500px) {
+/* Host page: shrink main content when chat is open on desktop (side-by-side).
+   For screens wider than 1600px, the chat widget takes 25% width (25vw),
+   so the main content shrinks to the remaining 75%. */
+@media (min-width: 1600px) {
   body[data-chat-open] .chat-widget-main-shrink {
-    width: calc(100% - 28rem);
-    max-width: calc(100% - 28rem);
+    width: calc(100% - 25vw);
+    max-width: calc(100% - 25vw);
   }
 }

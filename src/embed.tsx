@@ -109,7 +109,7 @@ class ChatbotController {
         }
       },
       onUserInactive: () => {
-        console.log('[Chatbot] Main site inactive for 30 seconds — dispatching suggestion notification')
+        console.log('[Chatbot] Main site inactive for 60 seconds — dispatching suggestion notification')
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('chat-widget-inactivity'))
           console.log('[Chatbot] Event dispatched: chat-widget-inactivity')
@@ -117,7 +117,8 @@ class ChatbotController {
       }
     })
 
-    this.eventTracker.setInactivityThreshold(0.5) // 30 seconds
+    // 60 seconds inactivity threshold before firing onUserInactive
+    this.eventTracker.setInactivityThreshold(1) // 60 seconds
     this.eventTracker.startTracking()
   }
 

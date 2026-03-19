@@ -36,19 +36,19 @@ export function ChatWidgetHeader({
           </Avatar>
         ) : null}
       </div>
-      <div className="flex items-center gap-2.5 flex-shrink-0">
+      <div className="flex items-center gap-2 flex-shrink-0">
         <IconButton
           icon={HelpIcon}
           aria-label="Help"
           variant="header"
           size="default"
         />
-        <IconButton
+        {/* <IconButton
           icon={BookmarkCleanIcon}
           aria-label="Bookmark"
           variant="header"
           size="default"
-        />
+        /> */}
         <IconButton
           icon={CollapsIcon}
           aria-label="Collapse"

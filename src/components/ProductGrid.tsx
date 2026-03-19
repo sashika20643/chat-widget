@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchChatBotObjects, type ChatBotObject } from '@/services/chatObjectsApi'
+import { fetchChatBotObjects, resolveImageUrl, type ChatBotObject } from '@/services/chatObjectsApi'
 import { cn } from '@/utils/utils'
 import BookmarkCleanIcon from '@/assets/icons/Bookmark Clean Icon.svg'
 
@@ -71,7 +71,7 @@ export function ProductGrid({ productIds, className }: ProductGridProps) {
       {objects.map((obj) => (
         <a
           key={obj.fca_object_id}
-          href={`https://www.bogen33.ch/`}
+          href={obj.product_url ?? 'https://www.bogen33.ch/'}
           target="_blank"
           rel="noopener noreferrer"
           className="block rounded-md overflow-hidden border border-border bg-muted hover:border-foreground/25 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring relative"
@@ -81,7 +81,7 @@ export function ProductGrid({ productIds, className }: ProductGridProps) {
             <img src={BookmarkCleanIcon} alt="" className="w-4 h-4" />
           </span>
           <img
-            src={obj.image_url || PLACEHOLDER_IMAGE}
+            src={resolveImageUrl(obj.image_url) || PLACEHOLDER_IMAGE}
             alt={obj.name}
             className="w-full aspect-square object-cover"
           />

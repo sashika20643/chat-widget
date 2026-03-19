@@ -145,7 +145,7 @@ const COMPONENTS = {
   h5: withClass("h5", "font-medium"),
   strong: withClass("strong", "font-semibold"),
   a: withClass("a", "text-primary underline underline-offset-2"),
-  blockquote: withClass("blockquote", "border-l-2 border-primary pl-4"),
+  blockquote: withClass("blockquote", "border-l-2 border-border pl-4"),
   code: ({ children, className, node, ...rest }: any) => {
     const match = /language-(\w+)/.exec(className || "")
     return match ? (
@@ -169,19 +169,19 @@ const COMPONENTS = {
   li: withClass("li", "my-1.5"),
   table: withClass(
     "table",
-    "w-full border-collapse overflow-y-auto rounded-md border border-foreground/20"
+    "w-full border-collapse overflow-y-auto rounded-md border border-border/20"
   ),
   th: withClass(
     "th",
-    "border border-foreground/20 px-4 py-2 text-left font-bold [&[align=center]]:text-center [&[align=right]]:text-right"
+    "border border-border/20 px-4 py-2 text-left font-bold [&[align=center]]:text-center [&[align=right]]:text-right"
   ),
   td: withClass(
     "td",
-    "border border-foreground/20 px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right"
+    "border border-border/20 px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right"
   ),
   tr: withClass("tr", "m-0 border-t p-0 even:bg-muted"),
   p: withClass("p", "whitespace-pre-wrap"),
-  hr: withClass("hr", "border-foreground/20"),
+  hr: withClass("hr", "border-border/20"),
 }
 
 function withClass(Tag: keyof React.JSX.IntrinsicElements, classes: string) {

@@ -1,6 +1,6 @@
 export interface MessageButton {
   label: string
-  onClick: () => void
+  onClick?: () => void
   variant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'link' | 'destructive' | 'black'
 }
 
@@ -12,7 +12,9 @@ export interface MessageImage {
 export interface MessageProductCard {
   src: string
   alt?: string
-  href: string
+  /** Link URL – use product_url from payload when present */
+  href?: string
+  product_url?: string
   title?: string
 }
 
@@ -30,7 +32,10 @@ export interface Message {
   id: string
   content: string | MessageContent
   role: 'user' | 'assistant'
-  timestamp: Date
+  /** ISO timestamp (serializable for Redux) */
+  timestamp: string
+  /** Total response time in ms (assistant messages only, for debugging – remove later) */
+  responseTimeMs?: number
 }
 
 export type ConversationState = 

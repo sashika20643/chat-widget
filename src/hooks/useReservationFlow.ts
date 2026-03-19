@@ -166,7 +166,7 @@ export function useReservationFlow({ threadId }: UseReservationFlowOptions) {
         id: Date.now().toString(),
         content,
         role: 'assistant',
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
       }
 
       dispatch(addMessage(confirmationMessage))

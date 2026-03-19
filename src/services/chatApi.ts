@@ -4,6 +4,10 @@ const CHAT_API_BASE_URL =
   (typeof import.meta !== 'undefined' && import.meta.env?.VITE_CHAT_API_BASE_URL) ||
   'https://getagent-chat-agent.ceilu9.easypanel.host'
 
+const CHAT_STREAM_API_URL =
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_CHAT_STREAM_API_URL) ||
+  'https://getagent-chat-agent.ceilu9.easypanel.host/api/chat/stream'
+
 export interface AppointmentData {
   appointment_id: string
   date: string
@@ -13,6 +17,8 @@ export interface AppointmentData {
 export interface ChatRequest {
   user_id: string
   message: string
+  /** Optional image URLs provided by the client */
+  images?: string[]
   thread_id?: string
   message_type?: 'user' | 'system'
   appointment_data?: AppointmentData | null
@@ -28,15 +34,21 @@ export interface ChatResponse {
   customer?: { name: string; tier: string }
 }
 
+export interface TriggerResponse {
+  message: string
+}
+
 /** POST /api/chat – send message and get assistant response. */
 export async function sendChatMessage(
   userId: string,
   message: string,
-  threadId?: string | null
+  threadId?: string | null,
+  images?: string[]
 ): Promise<ChatResponse> {
   const body: ChatRequest = {
     user_id: userId,
     message,
+    ...(images && images.length ? { images } : {}),
     message_type: 'user',
   }
   if (threadId) body.thread_id = threadId
@@ -48,6 +60,104 @@ export async function sendChatMessage(
   })
   if (!res.ok) throw new Error(`Chat API error: ${res.status}`)
   return res.json()
+}
+
+export interface ChatStreamCallbacks {
+  onChunk: (text: string) => void
+  onConnected?: (threadId: string) => void
+  /** Called when the backend sends a transient status update, e.g. \"Searching products...\" */
+  onStatus?: (statusMessage: string) => void
+  onDone?: (metadata?: { thread_id?: string; action?: string; product_ids?: string[] }) => void
+  onError?: (err: Error) => void
+}
+
+/** POST /api/chat/stream – send message and stream assistant response via SSE. */
+export async function sendChatMessageStream(
+  userId: string,
+  message: string,
+  callbacks: ChatStreamCallbacks,
+  threadId?: string | null,
+  images?: string[]
+): Promise<void> {
+  const body: {
+    user_id: string
+    message: string
+    images?: string[]
+    thread_id?: string | null
+  } = {
+    user_id: userId,
+    message,
+  }
+  if (images && images.length) body.images = images
+  if (threadId) body.thread_id = threadId
+
+  const res = await fetch(CHAT_STREAM_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+
+  if (!res.ok) {
+    const err = new Error(`Chat stream API error: ${res.status}`)
+    callbacks.onError?.(err)
+    throw err
+  }
+
+  const reader = res.body?.getReader()
+  if (!reader) {
+    callbacks.onError?.(new Error('No response body'))
+    return
+  }
+
+  const decoder = new TextDecoder()
+  let buffer = ''
+  let hasComplete = false
+
+  const parseLine = (raw: string) => {
+    const data = raw.startsWith('data: ') ? raw.slice(6).trim() : raw.trim()
+    if (!data || data === '[DONE]') return
+    try {
+      const parsed = JSON.parse(data) as { event?: string; data?: Record<string, unknown> }
+      const ev = parsed.event
+      const payload = parsed.data
+      if (ev === 'connected' && payload?.thread_id) {
+        callbacks.onConnected?.(String(payload.thread_id))
+      } else if (ev === 'status' && payload?.message) {
+        callbacks.onStatus?.(String(payload.message))
+      } else if ((ev === 'message' || ev === 'token') && payload?.text) {
+        callbacks.onChunk(String(payload.text))
+      } else if (ev === 'complete' && payload) {
+        hasComplete = true
+        callbacks.onDone?.({
+          thread_id: payload.thread_id as string | undefined,
+          action: payload.action as string | undefined,
+          product_ids: payload.product_ids as string[] | undefined,
+        })
+      }
+    } catch {
+      if (data) callbacks.onChunk(data)
+    }
+  }
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() ?? ''
+
+      for (const line of lines) {
+        parseLine(line)
+      }
+    }
+    if (buffer.trim()) parseLine(buffer)
+    if (!hasComplete) callbacks.onDone?.({})
+  } catch (err) {
+    callbacks.onError?.(err instanceof Error ? err : new Error(String(err)))
+    throw err
+  }
 }
 
 /** POST /api/chat – send system message with appointment summary (e.g. after booking). */
@@ -70,6 +180,20 @@ export async function sendAppointmentConfirmation(
     body: JSON.stringify(body),
   })
   if (!res.ok) throw new Error(`Chat API error: ${res.status}`)
+  return res.json()
+}
+
+/** POST /api/trigger – fire a named trigger (e.g. on inactivity) and get a suggested message. */
+export async function triggerWebFormPause(language: string = 'english'): Promise<TriggerResponse> {
+  const res = await fetch(`${CHAT_API_BASE_URL}/api/trigger`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      trigger_name: 'cart_pause',
+      language,
+    }),
+  })
+  if (!res.ok) throw new Error(`Trigger API error: ${res.status}`)
   return res.json()
 }
 

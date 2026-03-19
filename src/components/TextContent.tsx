@@ -2,11 +2,13 @@ import type { ReactNode } from "react";
 
 const variantStyles = {
   textLarge:
-    "text-text-primary text-[20px] lg:text-[24px] leading-7 lg:leading-8",
+    "text-text-primary text-[20px] lg:text-[20px] leading-7 lg:leading-8 font-[500]",
   textMedium:
-    "text-text-primary text-[15px] lg:text-[16px] leading-5 lg:leading-6",
+    "text-text-primary text-[15px] lg:text-[14px] leading-1.5 lg:leading-1.6 font-[500]",
   buttonText:
-    "text-[14px] lg:text-[15px] leading-5 lg:leading-6",
+    "text-[14px] lg:text-[15px] leading-5 lg:leading-6 font-[500]",
+  textSmall:
+    "text-[13px] lg:text-[14px] font-[550] leading-none",
 } as const;
 
 export type TextContentVariant = keyof typeof variantStyles;
