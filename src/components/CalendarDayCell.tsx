@@ -68,11 +68,11 @@ export function CalendarDayCell({
           'ring-2 ring-primary bg-primary/10'
       )}
     >
-      <div className="flex w-full items-start justify-between -mt-0.5">
-        <TextContent variant="textSmall" as="span" className="uppercase">
+      <div className="flex w-full items-start justify-between mt-.5">
+        <TextContent variant="textCalendar" as="span" className="uppercase">
           {dayName}
         </TextContent>
-        <TextContent variant="textSmall" as="span">
+        <TextContent variant="textCalendar" as="span">
           {dayNumber}
         </TextContent>
       </div>

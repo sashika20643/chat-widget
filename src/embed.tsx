@@ -6,6 +6,11 @@ import ChatWidget from '@/components/ChatWidget'
 import type { ChatWidgetRef } from '@/components/ChatWidget'
 import { store } from '@/store'
 import { ParentEventTracker } from '@/utils/parentEventTracker'
+import {
+  triggerInactivityNotification,
+  triggerProductDwellNotification,
+  triggerScrollIndecisionNotification,
+} from '@/utils/chatWidgetNotifications'
 import { Toaster } from '@/components/ui/shadCN/toaster-embed'
 import { toast } from 'sonner'
 import type { WidgetAction } from '@/types/chat'
@@ -23,6 +28,10 @@ interface ChatbotAPI {
   open: (config?: ChatbotConfig) => void
   close: () => void
   toggle: () => void
+  sendMessage: (text: string) => void
+  triggerInactivity: () => void
+  triggerProductDwell: (productName: string, dwellMs?: number) => void
+  triggerScrollIndecision: () => void
 }
 
 class ChatbotController {
@@ -34,7 +43,15 @@ class ChatbotController {
   private eventTracker: ParentEventTracker | null = null
   private lastClickToastTime = 0
   private lastScrollToastTime = 0
+  private lastMainScrollY = 0
+  private lastScrollDirection: 'up' | 'down' | null = null
+  private scrollDirectionChanges: Array<number> = []
+  private scrollIndecisionTriggeredAt = 0
   private readonly TOAST_THROTTLE_MS = 5000 // Show toast max once per 5 seconds
+  private readonly SCROLL_INDECISION_WINDOW_MS = 30_000
+  private readonly SCROLL_INDECISION_MIN_DELTA = 24
+  private readonly SCROLL_INDECISION_MIN_CHANGES = 2
+  private readonly SCROLL_INDECISION_COOLDOWN_MS = 30_000
 
   init() {
     if (this.isInitialized) {
@@ -85,6 +102,10 @@ class ChatbotController {
       return
     }
 
+    this.lastMainScrollY = this.getMainScrollY()
+    this.lastScrollDirection = null
+    this.scrollDirectionChanges = []
+
     this.eventTracker = new ParentEventTracker({
       onUserClick: (event) => {
         console.log('[Chatbot] Parent website click detected:', event)
@@ -107,19 +128,67 @@ class ChatbotController {
             duration: 2000,
           })
         }
+
+        this.trackScrollIndecision()
       },
       onUserInactive: () => {
-        console.log('[Chatbot] Main site inactive for 60 seconds — dispatching suggestion notification')
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('chat-widget-inactivity'))
-          console.log('[Chatbot] Event dispatched: chat-widget-inactivity')
-        }
+        // Inactivity trigger is now page-script controlled (ChatWidgetInactivityTrigger),
+        // so the default runtime auto-trigger is disabled to avoid duplicate notifications.
+        console.log('[Chatbot] Main site inactive detected (auto inactivity trigger disabled)')
       }
     })
 
     // 60 seconds inactivity threshold before firing onUserInactive
     this.eventTracker.setInactivityThreshold(1) // 60 seconds
     this.eventTracker.startTracking()
+  }
+
+  private getMainScrollY(): number {
+    try {
+      const mainWin = window.self !== window.top && window.top ? window.top : window
+      return (
+        mainWin.scrollY ??
+        mainWin.pageYOffset ??
+        mainWin.document.documentElement.scrollTop ??
+        mainWin.document.body.scrollTop ??
+        0
+      )
+    } catch {
+      return (
+        window.scrollY ??
+        window.pageYOffset ??
+        document.documentElement.scrollTop ??
+        document.body.scrollTop ??
+        0
+      )
+    }
+  }
+
+  private trackScrollIndecision() {
+    const now = Date.now()
+    const currentY = this.getMainScrollY()
+    const delta = currentY - this.lastMainScrollY
+    this.lastMainScrollY = currentY
+
+    if (Math.abs(delta) < this.SCROLL_INDECISION_MIN_DELTA) return
+
+    const direction: 'up' | 'down' = delta > 0 ? 'down' : 'up'
+    if (this.lastScrollDirection && this.lastScrollDirection !== direction) {
+      this.scrollDirectionChanges.push(now)
+    }
+    this.lastScrollDirection = direction
+
+    // Keep only recent direction changes inside the configured window.
+    this.scrollDirectionChanges = this.scrollDirectionChanges.filter(
+      (ts) => now - ts <= this.SCROLL_INDECISION_WINDOW_MS,
+    )
+
+    if (now - this.scrollIndecisionTriggeredAt < this.SCROLL_INDECISION_COOLDOWN_MS) return
+    if (this.scrollDirectionChanges.length < this.SCROLL_INDECISION_MIN_CHANGES) return
+
+    this.scrollIndecisionTriggeredAt = now
+    console.log('[Chatbot] Scroll indecision detected via ParentEventTracker')
+    triggerScrollIndecisionNotification()
   }
 
   // Cleanup method for event tracking (useful for widget destruction/cleanup scenarios)
@@ -207,6 +276,16 @@ class ChatbotController {
       this.open()
     }
   }
+
+  sendMessage(text: string) {
+    this.init()
+    if (!text || !text.trim()) return
+    if (this.widgetRef) {
+      void this.widgetRef.sendMessage(text.trim())
+    } else {
+      console.warn('[Chatbot] sendMessage called but widgetRef is not yet set')
+    }
+  }
 }
 
 // Expose global API
@@ -266,6 +345,11 @@ if (typeof window !== 'undefined') {
     open: (config?: ChatbotConfig) => chatbot.open(config),
     close: () => chatbot.close(),
     toggle: () => chatbot.toggle(),
+    sendMessage: (text: string) => chatbot.sendMessage(text),
+    triggerInactivity: () => triggerInactivityNotification(),
+    triggerProductDwell: (productName: string, dwellMs?: number) =>
+      triggerProductDwellNotification({ productName, dwellMs }),
+    triggerScrollIndecision: () => triggerScrollIndecisionNotification(),
   }
 
   // Expose toast function globally for use in parent website

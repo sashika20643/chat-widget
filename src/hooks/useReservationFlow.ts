@@ -29,7 +29,7 @@ export function useReservationFlow({ threadId }: UseReservationFlowOptions) {
   const [flow, setFlow] = useState<ConversationFlow>({ state: 'idle' })
   const [reservationData, setReservationData] = useState<ReservationData>({})
 
-  const startBookingFlow = useCallback(() => {
+  const startBookingFlow = useCallback((bookingProductId?: string) => {
     const today = new Date()
     const startDate = new Date(today.getFullYear(), today.getMonth(), 1)
     const endDate = new Date(today.getFullYear(), today.getMonth() + 2, 0, 23, 59, 59)
@@ -41,6 +41,9 @@ export function useReservationFlow({ threadId }: UseReservationFlowOptions) {
     console.log('[ChatWidget] Date range:', { startDate: startDateISO, endDate: endDateISO })
 
     dispatch(fetchCalendarEventsAsync({ startDate: startDateISO, endDate: endDateISO }))
+
+    // If user came from product detail ("Besichtigen"), prefill the message later.
+    setReservationData((prev) => ({ ...prev, bookingProductId }))
 
     setFlow({
       state: 'reservation_flow',
@@ -100,11 +103,18 @@ export function useReservationFlow({ threadId }: UseReservationFlowOptions) {
         })
 
         const fullName = `${details.firstName} ${details.lastName}`
+        const bookingProductId = reservationData.bookingProductId
+        const subject = bookingProductId
+          ? `booking with ${fullName} for product-${bookingProductId}`
+          : `booking with ${fullName}`
+
+        const calendarContent = details.message
+          ? `Appointment booking for ${fullName}\n\nMessage: ${details.message}`
+          : `Appointment booking for ${fullName}`
+
         await createCalendarEvent({
-          subject: `Appointment with ${fullName}-test`,
-          content: `Appointment booking for ${fullName}-test${
-            details.message ? `\n\nMessage: ${details.message}` : ''
-          }`,
+          subject,
+          content: calendarContent,
           start_time: startTimeISO,
           end_time: endTimeISO,
           location: 'Showroom',
@@ -191,6 +201,7 @@ export function useReservationFlow({ threadId }: UseReservationFlowOptions) {
         selectedDate: prev.selectedDate,
         availableSlots: undefined,
         selectedTime: undefined,
+        bookingProductId: prev.bookingProductId,
         userDetails: undefined,
       }))
       setFlow({

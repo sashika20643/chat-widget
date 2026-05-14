@@ -248,8 +248,8 @@ function ChatInputBar({
           <ImageAttachmentPreviewStrip attachments={attachments} onRemove={removeAttachment} />
 
           {/* Input box + Send (stable height) */}
-          <div className="flex items-end min-h-[50px] border border-border rounded-[28px] overflow-hidden px-[10.5px] items-center">
-            <div className="flex items-end w-full">
+          <div className="flex min-h-[50px] border border-border rounded-[28px] overflow-hidden px-[10.5px] items-center">
+            <div className="flex items-center w-full">
             <textarea
               ref={textareaRef}
               value={value}
@@ -271,9 +271,9 @@ function ChatInputBar({
                 isUploading ||
                 (!value.trim() && uploadedUrls.length === 0)
               }
-              className="h-[40px] w-[40px] flex-shrink-0 mb-0 rounded-full bg-transparent hover:bg-transparent border border-border p-0 flex items-center justify-center"
+              className="h-[30px] w-[30px] flex-shrink-0 mb-0 rounded-full bg-transparent hover:bg-transparent border border-border p-0 flex items-center justify-center lg:h-[40px] lg:w-[40px]"
             >
-              <Send className="h-5 w-5" />
+              <Send className="h-4 w-4 lg:h-5 lg:w-5" />
             </Button>
             </div>
           </div>

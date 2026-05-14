@@ -77,7 +77,7 @@ export function CalendarGrid({
       )}
     >
       {/* Month and navigation - outside the grid container */}
-      <div className="flex w-full items-center justify-center pb-2">
+      <div className="relative -top-[20px] sm:top-0 flex w-full items-center justify-center pb-2">
         <div className="flex gap-1 items-center ">
         <Button
           type="button"
@@ -88,7 +88,7 @@ export function CalendarGrid({
           disabled={!canPrev}
           onClick={() => onMonthChange(subMonths(month, 1))}
         >
-          <ChevronLeftIcon className="size-8" />
+          <ChevronLeftIcon className="size-[35px] [stroke-width:1.75] sm:size-8 sm:[stroke-width:2]" />
         </Button>
         <TextContent variant="textMedium" as="span" className="min-w-[4rem] text-center">
           {format(month, 'MMMM yyyy')}
@@ -102,7 +102,7 @@ export function CalendarGrid({
           disabled={!canNext}
           onClick={() => onMonthChange(addMonths(month, 1))}
         >
-          <ChevronRightIcon className="size-8" />
+          <ChevronRightIcon className="size-[35px] [stroke-width:1.75] sm:size-8 sm:[stroke-width:2]" />
         </Button>
         </div>
       </div>

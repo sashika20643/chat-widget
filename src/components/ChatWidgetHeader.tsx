@@ -2,32 +2,32 @@ import { Avatar, AvatarImage } from '@/components/ui/shadCN/avatar'
 import { IconButton } from '@/components/ui/icon-button'
 import H100Icon from '@/assets/icons/H100 AI ICON.svg'
 import HelpIcon from '@/assets/icons/Help Icon.svg'
-import BookmarkCleanIcon from '@/assets/icons/Bookmark Clean Icon.svg'
 import CollapsIcon from '@/assets/icons/Collaps Icon.svg'
 
 interface ChatWidgetHeaderProps {
   hasMessages: boolean
-  isInReservationFlow: boolean
+  /** Full-panel flows (booking, newsletter, etc.) — show back control */
+  isInOverlayFlow: boolean
   onBack: () => void
   onClose: () => void
 }
 
 export function ChatWidgetHeader({
   hasMessages,
-  isInReservationFlow,
+  isInOverlayFlow,
   onBack,
   onClose,
 }: ChatWidgetHeaderProps) {
   return (
     <div className="flex items-center justify-between py-3.5 px-3.5 lg:p-4 flex-shrink-0">
       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-        {isInReservationFlow ? (
+        {isInOverlayFlow ? (
           <IconButton
             icon={CollapsIcon}
             aria-label="Back"
             variant="header"
             size="default"
-            className="flex-shrink-0 [&>img]:rotate-90"
+            className="flex-shrink-0 [&>img]:rotate-90 h-37 w-37 lg:h-44 lg:w-44"
             onClick={onBack}
           />
         ) : hasMessages ? (
@@ -36,12 +36,13 @@ export function ChatWidgetHeader({
           </Avatar>
         ) : null}
       </div>
-      <div className="flex items-center gap-2 flex-shrink-0">
+      <div className="flex items-center gap-2 flex-shrink-0 ">
         <IconButton
           icon={HelpIcon}
           aria-label="Help"
           variant="header"
           size="default"
+          className="lg:h-[44px] lg:w-[44px] h-[37px] w-[37px]"
         />
         {/* <IconButton
           icon={BookmarkCleanIcon}
@@ -55,6 +56,7 @@ export function ChatWidgetHeader({
           variant="header"
           size="default"
           onClick={onClose}
+          className="lg:h-[44px] lg:w-[44px] h-[37px] w-[37px]"
         />
       </div>
     </div>

@@ -9,7 +9,8 @@ export const IMAGE_BASE_URL =
 
 /** Resolve image URL: use as-is if absolute, otherwise prepend IMAGE_BASE_URL */
 export function resolveImageUrl(url: string | null | undefined): string | null {
-  if (!url) return null
+  // Runtime safety: some API payloads may contain unexpected non-string values.
+  if (!url || typeof url !== 'string') return null
   if (url.startsWith('http://') || url.startsWith('https://')) return url
   const base = IMAGE_BASE_URL.replace(/\/$/, '')
   const path = url.startsWith('/') ? url : `/${url}`
@@ -29,6 +30,10 @@ export interface ChatBotObject {
   image_url: string | null
   /** Product page URL from API */
   product_url?: string | null
+  /** Long product description HTML/text from source */
+  web_text_a?: string | null
+  /** Additional product image URLs for slideshow */
+  images?: string[] | null
 }
 
 export interface ChatBotObjectsResponse {

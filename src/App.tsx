@@ -1,4 +1,6 @@
 import ChatWidget from '@/components/ChatWidget'
+import { InactivityNotificationExample } from '@/components/examples/InactivityNotificationExample'
+import { ProductDwellNotificationExample } from '@/components/examples/ProductDwellNotificationExample'
 
 function App() {
   function handleSendMessage(message: string) {
@@ -34,6 +36,9 @@ function App() {
               </ul>
             </div>
           </div>
+
+          <InactivityNotificationExample />
+          <ProductDwellNotificationExample />
         </div>
       </div>
       

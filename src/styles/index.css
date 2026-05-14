@@ -163,7 +163,8 @@
   /* Chat bubble with tail for assistant messages */
   .chat-bubble-assistant {
     position: relative;
-    padding: 23px;
+    padding: 20px;
+    margin-left: 4px;
     background-color: var(--color-surface) !important;
     border: solid 0.85px #1d1d1b;
     border-radius: 31px;
@@ -188,8 +189,8 @@
   /* Chat bubble with tail for user messages (same as assistant: white bg, black text) */
   .chat-bubble-user {
     position: relative;
-    margin: 23px;
-    padding: 23px;
+    margin-right: 4px;
+    padding: 20px;
     background-color: var(--color-surface) !important;
     color: var(--color-border-strong);
     border: solid 0.85px #1d1d1b;
@@ -199,7 +200,7 @@
 
   .chat-bubble-user .tail {
     position: absolute;
-    bottom: -24px;;
+    bottom: -24px;
     right: 15px;
     width: 20px;
     height: 30px;

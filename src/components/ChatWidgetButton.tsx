@@ -10,7 +10,7 @@ interface ChatWidgetButtonProps {
 
 function ChatWidgetButton({ onOpen }: ChatWidgetButtonProps) {
   return (
-    <div className="fixed bottom-6 left-1 right-1 lg:left-auto lg:right-6 z-50 flex flex-row lg:flex-row items-end lg:items-center gap-3">
+    <div className="fixed bottom-6 left-4 right-4 lg:left-auto lg:right-6 z-50 flex flex-row lg:flex-row items-center lg:items-center justify-center lg:justify-end gap-3">
       {/* Main Floating Button */}
       <IconButton
         icon={H100Icon}

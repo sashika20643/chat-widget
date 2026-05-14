@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/shadCN/button'
 import { Input } from '@/components/ui/shadCN/input'
 import { ChatBubble } from '@/components/ui/chat-bubble'
@@ -15,17 +16,23 @@ function UserDetailsForm({ onSubmit }: UserDetailsFormProps) {
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [message, setMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (firstName && lastName && email && phone) {
-      onSubmit({ firstName, lastName, email, phone, message: message || undefined })
+      setIsSubmitting(true)
+      try {
+        await onSubmit({ firstName, lastName, email, phone, message: message || undefined })
+      } finally {
+        setIsSubmitting(false)
+      }
     }
   }
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
-      <ChatBubble variant="assistant" className="p-4 rounded-3xl">
+      <ChatBubble variant="assistant" className="p-4 rounded-3xl w-[83%]">
       <TextContent variant="textMedium" className="text-foreground mb-4">
         Now we just need your contact details. We will only use your data to communicate about the appointment :)
       </TextContent>
@@ -38,7 +45,7 @@ function UserDetailsForm({ onSubmit }: UserDetailsFormProps) {
             onChange={(e) => setFirstName(e.target.value)}
             placeholder="First name"
             required
-            className="text-base text-foreground rounded-xl"
+            className="text-base text-foreground rounded-2xl"
           />
 
           <Input
@@ -47,7 +54,7 @@ function UserDetailsForm({ onSubmit }: UserDetailsFormProps) {
             onChange={(e) => setLastName(e.target.value)}
             placeholder="Last name"
             required
-            className="text-base text-foreground rounded-xl"
+            className="text-base text-foreground rounded-2xl"
           />
         </div>
 
@@ -57,7 +64,7 @@ function UserDetailsForm({ onSubmit }: UserDetailsFormProps) {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
           required
-          className="text-base text-foreground rounded-xl"
+          className="text-base text-foreground rounded-2xl"
         />
 
         <Input
@@ -66,7 +73,7 @@ function UserDetailsForm({ onSubmit }: UserDetailsFormProps) {
           onChange={(e) => setPhone(e.target.value)}
           placeholder="Phone number"
           required
-          className="text-base text-foreground rounded-xl"
+          className="text-base text-foreground rounded-2xl"
         />
 
         <textarea
@@ -74,15 +81,24 @@ function UserDetailsForm({ onSubmit }: UserDetailsFormProps) {
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Message (optional)"
           className={cn(
-            "flex h-9 w-full rounded-xl border border-input bg-transparent px-3 py-1 text-base text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-dark disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+            "flex h-9 w-full rounded-2xl border border-input bg-transparent px-3 py-1 text-base text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-dark disabled:cursor-not-allowed disabled:opacity-50 resize-none"
           )}
         />
       </div>
 
-      <Button type="submit" variant="black" size="sm" className="mt-4 rounded-full px-4 py-3" disabled={!firstName || !lastName || !email || !phone}>
-        <TextContent variant="buttonText" className="text-text-inverse">
-          Done
-        </TextContent>
+      <Button
+        type="submit"
+        variant="black"
+        size="sm"
+        className="mt-1 pl-2 rounded-full px-4 py-3"
+        disabled={!firstName || !lastName || !email || !phone || isSubmitting}
+      >
+        <span className="flex items-center gap-2">
+          {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+          <TextContent variant="buttonText" className="text-text-inverse">
+            Done
+          </TextContent>
+        </span>
       </Button>
       </ChatBubble>
     </form>

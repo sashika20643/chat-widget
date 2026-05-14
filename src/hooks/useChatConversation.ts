@@ -3,8 +3,20 @@ import type React from 'react'
 import { useAppDispatch } from '@/store/hooks'
 import { addMessage, updateMessage } from '@/store/slices/chatSlice'
 import { getOrCreateUserId } from '@/utils/userId'
-import { sendChatMessageStream, detectScenario } from '@/services/chatApi'
+import {
+  detectScenario,
+  NEWSLETTER_ASSISTANT_MESSAGE,
+  parseSubscribeSubAction,
+  sendChatMessageStream,
+} from '@/services/chatApi'
 import type { Message as MessageType, MessageContent } from '@/types/chat'
+import {
+  createInitialAuthLoginWizardState,
+  createInitialAuthRegisterWizardState,
+  createInitialMobelaboWizardState,
+  createInitialSearchServiceWizardState,
+} from '@/types/chat'
+import { detectAuthKeywordIntent } from '@/utils/authKeyword'
 
 const createUserMessage = (content: string | MessageContent): MessageType => ({
   id: Date.now().toString(),
@@ -19,6 +31,22 @@ const createAssistantMessage = (content: MessageType['content']): MessageType =>
   role: 'assistant',
   timestamp: new Date().toISOString(),
 })
+
+function isNewsletterStreamAction(action: string | undefined): boolean {
+  if (!action) return false
+  const n = action.toString().toLowerCase().replace(/-/g, '_').trim()
+  return n === 'newsletter' || n === 'news_letter' || n.includes('newsletter')
+}
+
+function isGeneralChoiceStreamAction(action: string | undefined): boolean {
+  if (!action) return false
+  const n = action.toString().toLowerCase().replace(/-/g, '_').trim()
+  return n === 'general_choice' || n.includes('general_choice')
+}
+
+function normalizeStreamAction(action: string | undefined): string {
+  return action?.toString().toLowerCase().replace(/-/g, '_').trim() ?? ''
+}
 
 interface UseChatConversationOptions {
   startBookingFlow: () => void
@@ -74,12 +102,45 @@ export function useChatConversation({
               const responseTimeMs = Math.round(performance.now() - startTime)
               if (meta?.thread_id) setThreadId(meta.thread_id)
               if (assistantMsgId) {
-                const updates: { text: string; productIds?: string[]; buttons?: MessageContent['buttons'] } = { text: accumulatedText }
+                const updates: {
+                  text: string
+                  productIds?: string[]
+                  buttons?: MessageContent['buttons']
+                  newsletterSignup?: boolean
+                  generalChoiceMenu?: boolean
+                  mobelaboWizard?: MessageContent['mobelaboWizard']
+                  searchServiceWizard?: MessageContent['searchServiceWizard']
+                } = { text: accumulatedText }
                 if (meta?.product_ids && meta.product_ids.length > 0) {
                   updates.productIds = meta.product_ids
                 }
-                if (meta?.action === 'appointment') {
-                  updates.buttons = [{ label: 'Book an appointment', variant: 'black' }]
+                const actionNorm = normalizeStreamAction(meta?.action)
+                if (actionNorm === 'subscribe') {
+                  const sub = parseSubscribeSubAction(
+                    meta?.subscription_type ?? meta?.sub_action,
+                  )
+                  if (sub === 'newsletter') {
+                    updates.newsletterSignup = true
+                  } else if (sub === 'moebelabo') {
+                    updates.mobelaboWizard = createInitialMobelaboWizardState()
+                  } else if (sub === 'search_service') {
+                    updates.searchServiceWizard = createInitialSearchServiceWizardState()
+                  } else if (sub === 'all') {
+                    updates.generalChoiceMenu = true
+                  }
+                } else {
+                  if (actionNorm === 'appointment') {
+                    updates.buttons = [{ label: 'Book an appointment', variant: 'black' }]
+                  }
+                  if (isNewsletterStreamAction(meta?.action)) {
+                    updates.newsletterSignup = true
+                  }
+                  if (isGeneralChoiceStreamAction(meta?.action)) {
+                    updates.generalChoiceMenu = true
+                  }
+                }
+                if (updates.newsletterSignup) {
+                  updates.text = NEWSLETTER_ASSISTANT_MESSAGE
                 }
                 dispatch(
                   updateMessage({
@@ -113,6 +174,35 @@ export function useChatConversation({
 
     if (!trimmed && !hasImages) return
 
+    const authIntent = !hasImages ? detectAuthKeywordIntent(trimmed) : null
+    if (authIntent) {
+      onBeforeInteraction?.()
+      const userMessage = createUserMessage(trimmed)
+      dispatch(addMessage(userMessage))
+      setInputValue('')
+      if (authIntent === 'register') {
+        dispatch(
+          addMessage(
+            createAssistantMessage({
+              text: 'Here’s your registration form.',
+              authRegisterWizard: createInitialAuthRegisterWizardState(),
+            }),
+          ),
+        )
+      } else {
+        dispatch(
+          addMessage(
+            createAssistantMessage({
+              text: 'Sign in with your email — we will send you a magic link.',
+              authLoginWizard: createInitialAuthLoginWizardState(),
+            }),
+          ),
+        )
+      }
+      onSendMessage?.(trimmed)
+      return
+    }
+
     onBeforeInteraction?.()
 
     const userContent: MessageType['content'] = hasImages
@@ -140,6 +230,34 @@ export function useChatConversation({
       const lowerTag = tag.toLowerCase()
       if (lowerTag.includes('book') || lowerTag.includes('timeslot')) {
         startBookingFlow()
+        return
+      }
+
+      const authIntent = detectAuthKeywordIntent(tag)
+      if (authIntent) {
+        onBeforeInteraction?.()
+        const userMessage = createUserMessage(tag)
+        dispatch(addMessage(userMessage))
+        if (authIntent === 'register') {
+          dispatch(
+            addMessage(
+              createAssistantMessage({
+                text: 'Here’s your registration form.',
+                authRegisterWizard: createInitialAuthRegisterWizardState(),
+              }),
+            ),
+          )
+        } else {
+          dispatch(
+            addMessage(
+              createAssistantMessage({
+                text: 'Sign in with your email — we will send you a magic link.',
+                authLoginWizard: createInitialAuthLoginWizardState(),
+              }),
+            ),
+          )
+        }
+        onSendMessage?.(tag)
         return
       }
 

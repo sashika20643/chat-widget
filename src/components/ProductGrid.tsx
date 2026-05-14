@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { fetchChatBotObjects, resolveImageUrl, type ChatBotObject } from '@/services/chatObjectsApi'
 import { cn } from '@/utils/utils'
-import BookmarkCleanIcon from '@/assets/icons/Bookmark Clean Icon.svg'
+import type { MessageProductDetail } from '@/types/chat'
 
 const PLACEHOLDER_IMAGE = 'data:image/svg+xml,' + encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="#e5e7eb" width="200" height="200"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="14" font-family="sans-serif">No image</text></svg>'
@@ -10,25 +10,54 @@ const PLACEHOLDER_IMAGE = 'data:image/svg+xml,' + encodeURIComponent(
 interface ProductGridProps {
   productIds: string[]
   className?: string
+  onProductSelect?: (product: MessageProductDetail) => void
 }
 
 function ProductGridSkeleton({ count = 4 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+    <div className="grid grid-cols-2 lg:grid-cols-3 border-l border-t border-border">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="rounded-md overflow-hidden border border-border bg-white">
-          <div className="w-full aspect-square bg-white animate-pulse" />
-          <div className="p-2 space-y-1 bg-white">
-            <div className="h-3 w-3/4 rounded bg-muted animate-pulse" />
-            <div className="h-3 w-1/2 rounded bg-muted animate-pulse" />
-          </div>
+        <div key={i} className="overflow-hidden border-r border-b border-border">
+          <div className="w-full aspect-square bg-muted animate-pulse" />
         </div>
       ))}
     </div>
   )
 }
 
-export function ProductGrid({ productIds, className }: ProductGridProps) {
+function toProductDetail(obj: ChatBotObject): MessageProductDetail {
+  const withExtras = obj as ChatBotObject & {
+    description?: string | null
+    short_description?: string | null
+    measurements?: string | null
+    image_urls?: string[] | null
+    gallery_images?: string[] | null
+  }
+
+  const primary = resolveImageUrl(obj.image_url)
+  const extraImages = [
+    ...(obj.images ?? []),
+    ...(withExtras.image_urls ?? []),
+    ...(withExtras.gallery_images ?? []),
+  ]
+    .map((url) => resolveImageUrl(url))
+    .filter((u): u is string => !!u)
+
+  const uniqueImages = Array.from(new Set([primary, ...extraImages].filter((u): u is string => !!u)))
+
+  return {
+    objectId: String(obj.object_id),
+    name: obj.name,
+    price: obj.price,
+    displayedPrice: obj.displayed_price,
+    measurements: withExtras.measurements ?? null,
+    description: obj.web_text_a ?? withExtras.description ?? withExtras.short_description ?? null,
+    images: uniqueImages.map((src) => ({ src, alt: obj.name })),
+    productUrl: obj.product_url ?? null,
+  }
+}
+
+export function ProductGrid({ productIds, className, onProductSelect }: ProductGridProps) {
   const [objects, setObjects] = useState<ChatBotObject[] | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -67,31 +96,24 @@ export function ProductGrid({ productIds, className }: ProductGridProps) {
   }
 
   return (
-    <div className={cn('mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2', className)}>
+    <div className={cn('mt-3 grid grid-cols-2 lg:grid-cols-3 border-l border-t border-border', className)}>
       {objects.map((obj) => (
-        <a
+        <button
+          type="button"
           key={obj.fca_object_id}
-          href={obj.product_url ?? 'https://www.bogen33.ch/'}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block rounded-md overflow-hidden border border-border bg-muted hover:border-foreground/25 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring relative"
+          className="block overflow-hidden border-r border-b border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring relative"
           title={obj.name}
+          onClick={() => {
+            if (!onProductSelect) return
+            onProductSelect(toProductDetail(obj))
+          }}
         >
-          <span className="absolute top-2 left-2 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-white/90 shadow-sm" aria-hidden>
-            <img src={BookmarkCleanIcon} alt="" className="w-4 h-4" />
-          </span>
           <img
             src={resolveImageUrl(obj.image_url) || PLACEHOLDER_IMAGE}
             alt={obj.name}
             className="w-full aspect-square object-cover"
           />
-          <div className="p-2">
-            <p className="text-xs font-medium text-foreground truncate" title={obj.name}>
-              {obj.name}
-            </p>
-            <p className="text-xs text-muted-foreground">{obj.displayed_price} CHF</p>
-          </div>
-        </a>
+        </button>
       ))}
     </div>
   )

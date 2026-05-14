@@ -13,7 +13,7 @@ export interface SerializedMessage {
 function toSerialized(m: MessageType): SerializedMessage {
   return {
     ...m,
-    timestamp: m.timestamp instanceof Date ? m.timestamp.toISOString() : (m.timestamp as string),
+    timestamp: m.timestamp,
   }
 }
 
@@ -52,8 +52,12 @@ const chatSlice = createSlice({
     clearMessages(state) {
       state.messages = []
     },
+    removeMessages(state, action: PayloadAction<{ ids: string[] }>) {
+      const drop = new Set(action.payload.ids)
+      state.messages = state.messages.filter((m) => !drop.has(m.id))
+    },
   },
 })
 
-export const { addMessage, updateMessage, setMessages, clearMessages } = chatSlice.actions
+export const { addMessage, updateMessage, setMessages, clearMessages, removeMessages } = chatSlice.actions
 export default chatSlice.reducer

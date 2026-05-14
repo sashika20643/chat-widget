@@ -1,4 +1,8 @@
-import type { ScenarioResponse, MessageContent } from '@/types/chat'
+import type { ScenarioResponse, MessageContent, SubscribeSubAction } from '@/types/chat'
+import {
+  createInitialMobelaboWizardState,
+  createInitialSearchServiceWizardState,
+} from '@/types/chat'
 
 const CHAT_API_BASE_URL =
   (typeof import.meta !== 'undefined' && import.meta.env?.VITE_CHAT_API_BASE_URL) ||
@@ -7,6 +11,21 @@ const CHAT_API_BASE_URL =
 const CHAT_STREAM_API_URL =
   (typeof import.meta !== 'undefined' && import.meta.env?.VITE_CHAT_STREAM_API_URL) ||
   'https://getagent-chat-agent.ceilu9.easypanel.host/api/chat/stream'
+
+/** Assistant copy for newsletter signup; replaces API response text when action is newsletter. */
+export const NEWSLETTER_ASSISTANT_MESSAGE = `You can join our newsletter below to
+receive a 10% welcome bonus and
+stay updated on our latest vintage
+arrivals.
+Claim 10% welcome bonus now: `
+
+function messageIncludesSubscribeKeyword(message: string): boolean {
+  return message.toLowerCase().includes('subscribe')
+}
+
+function messageIncludesGeneralChoiceKeyword(message: string): boolean {
+  return message.toLowerCase().includes('general choice')
+}
 
 export interface AppointmentData {
   appointment_id: string
@@ -29,6 +48,9 @@ export interface ChatResponse {
   message: string
   action: string
   product_ids?: string[]
+  /** Present when action is subscribe; which subscription flow to open */
+  subscription_type?: string
+  sub_action?: string
   is_on_topic?: boolean
   language?: string
   customer?: { name: string; tier: string }
@@ -45,6 +67,22 @@ export async function sendChatMessage(
   threadId?: string | null,
   images?: string[]
 ): Promise<ChatResponse> {
+  if (messageIncludesSubscribeKeyword(message)) {
+    return {
+      thread_id: threadId ?? '',
+      message: NEWSLETTER_ASSISTANT_MESSAGE,
+      action: 'newsletter',
+    }
+  }
+
+  if (messageIncludesGeneralChoiceKeyword(message)) {
+    return {
+      thread_id: threadId ?? '',
+      message: '',
+      action: 'general_choice',
+    }
+  }
+
   const body: ChatRequest = {
     user_id: userId,
     message,
@@ -62,12 +100,22 @@ export async function sendChatMessage(
   return res.json()
 }
 
+/** Metadata on stream `complete` event (and mock paths). */
+export interface ChatStreamCompleteMetadata {
+  thread_id?: string
+  action?: string
+  product_ids?: string[]
+  /** Subscription sub-type when action is subscribe */
+  subscription_type?: string
+  sub_action?: string
+}
+
 export interface ChatStreamCallbacks {
   onChunk: (text: string) => void
   onConnected?: (threadId: string) => void
   /** Called when the backend sends a transient status update, e.g. \"Searching products...\" */
   onStatus?: (statusMessage: string) => void
-  onDone?: (metadata?: { thread_id?: string; action?: string; product_ids?: string[] }) => void
+  onDone?: (metadata?: ChatStreamCompleteMetadata) => void
   onError?: (err: Error) => void
 }
 
@@ -79,6 +127,30 @@ export async function sendChatMessageStream(
   threadId?: string | null,
   images?: string[]
 ): Promise<void> {
+  if (messageIncludesSubscribeKeyword(message)) {
+    if (threadId) {
+      callbacks.onConnected?.(threadId)
+    }
+    callbacks.onChunk(NEWSLETTER_ASSISTANT_MESSAGE)
+    callbacks.onDone?.({
+      thread_id: threadId ?? undefined,
+      action: 'newsletter',
+    })
+    return
+  }
+
+  if (messageIncludesGeneralChoiceKeyword(message)) {
+    if (threadId) {
+      callbacks.onConnected?.(threadId)
+    }
+    callbacks.onChunk('')
+    callbacks.onDone?.({
+      thread_id: threadId ?? undefined,
+      action: 'general_choice',
+    })
+    return
+  }
+
   const body: {
     user_id: string
     message: string
@@ -128,10 +200,20 @@ export async function sendChatMessageStream(
         callbacks.onChunk(String(payload.text))
       } else if (ev === 'complete' && payload) {
         hasComplete = true
+        const p = payload as Record<string, unknown>
+        const subscriptionRaw =
+          (typeof p.subscription_type === 'string' && p.subscription_type.trim()) ||
+          (typeof p.subscriptionType === 'string' && p.subscriptionType.trim()) ||
+          (typeof p.sub_action === 'string' && p.sub_action.trim()) ||
+          (typeof p.subAction === 'string' && p.subAction.trim()) ||
+          (typeof p.subscribe_sub_action === 'string' && p.subscribe_sub_action.trim()) ||
+          (typeof p.subscribeSubAction === 'string' && p.subscribeSubAction.trim()) ||
+          undefined
         callbacks.onDone?.({
           thread_id: payload.thread_id as string | undefined,
           action: payload.action as string | undefined,
           product_ids: payload.product_ids as string[] | undefined,
+          subscription_type: subscriptionRaw,
         })
       }
     } catch {
@@ -197,11 +279,68 @@ export async function triggerWebFormPause(language: string = 'english'): Promise
   return res.json()
 }
 
+function isNewsletterActionValue(action: string | undefined): boolean {
+  if (!action) return false
+  const n = action.toString().toLowerCase().replace(/-/g, '_').trim()
+  return n === 'newsletter' || n === 'news_letter' || n.includes('newsletter')
+}
+
+function isGeneralChoiceActionValue(action: string | undefined): boolean {
+  if (!action) return false
+  const n = action.toString().toLowerCase().replace(/-/g, '_').trim()
+  return n === 'general_choice' || n.includes('general_choice')
+}
+
+function normalizeActionValue(action: string | undefined): string {
+  return action?.toString().toLowerCase().replace(/-/g, '_').trim() ?? ''
+}
+
+/** Parse subscription sub-action string from API (e.g. NEWSLETTER, moebelabo). */
+export function parseSubscribeSubAction(raw: string | undefined): SubscribeSubAction | null {
+  if (!raw) return null
+  const n = raw.toLowerCase().replace(/-/g, '_').trim()
+  if (n === 'newsletter' || n === 'news_letter') return 'newsletter'
+  if (n === 'moebelabo' || n === 'mobelabo' || n === 'moebel_abo') return 'moebelabo'
+  if (n === 'search_service' || n === 'searchservice') return 'search_service'
+  if (n === 'all') return 'all'
+  return null
+}
+
+function applySubscribeScenarioToContent(content: MessageContent, sub: SubscribeSubAction | null) {
+  if (!sub) return
+  if (sub === 'newsletter') {
+    content.newsletterSignup = true
+  } else if (sub === 'moebelabo') {
+    content.mobelaboWizard = createInitialMobelaboWizardState()
+  } else if (sub === 'search_service') {
+    content.searchServiceWizard = createInitialSearchServiceWizardState()
+  } else if (sub === 'all') {
+    content.generalChoiceMenu = true
+  }
+}
+
 /** Map ChatResponse to MessageContent for the UI. */
 export function chatResponseToMessageContent(res: ChatResponse): MessageContent {
   const content: MessageContent = { text: res.message || '' }
   if (res.product_ids && res.product_ids.length > 0) {
     content.productIds = res.product_ids
+  }
+  const actionNorm = normalizeActionValue(res.action)
+  if (actionNorm === 'subscribe') {
+    const subRaw = res.subscription_type ?? res.sub_action
+    const sub = parseSubscribeSubAction(subRaw)
+    applySubscribeScenarioToContent(content, sub)
+    if (sub === 'newsletter') {
+      content.text = NEWSLETTER_ASSISTANT_MESSAGE
+    }
+  } else {
+    if (isNewsletterActionValue(res.action)) {
+      content.newsletterSignup = true
+      content.text = NEWSLETTER_ASSISTANT_MESSAGE
+    }
+    if (isGeneralChoiceActionValue(res.action)) {
+      content.generalChoiceMenu = true
+    }
   }
   return content
 }
@@ -211,7 +350,15 @@ export async function detectScenario(message: string): Promise<ScenarioResponse>
   return new Promise((resolve) => {
     setTimeout(() => {
       const lowerMessage = message.toLowerCase()
-      
+
+      if (lowerMessage.includes('general choice')) {
+        resolve({
+          scenario: null,
+          message: { text: '', generalChoiceMenu: true },
+        })
+        return
+      }
+
       // Check for reservation keywords
       if (lowerMessage.includes('sofa') || 
           lowerMessage.includes('showroom') || 
@@ -302,7 +449,7 @@ export async function getAvailableTimeSlots(_date: Date): Promise<{
   return new Promise((resolve) => {
     setTimeout(() => {
       const allSlots = [
-        '08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00'
+        '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
       ]
       
       // Randomly mark some slots as picked (from database)
