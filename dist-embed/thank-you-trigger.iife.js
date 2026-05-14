@@ -1,0 +1,1 @@
+(function(){"use strict";const t="chat-widget-thank-you";function n(i){typeof window>"u"||window.dispatchEvent(new CustomEvent(t,{detail:i}))}window.ChatWidgetThankYouTrigger={trigger(){window.__CHAT_WIDGET_PENDING_THANK_YOU__={ts:Date.now()},requestAnimationFrame(()=>{requestAnimationFrame(()=>{n()})})}}})();

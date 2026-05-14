@@ -19,10 +19,21 @@ export default defineConfig({
       output: {
         inlineDynamicImports: true,
         extend: true,
+        assetFileNames: (assetInfo) => {
+          // Preserve font file structure in dist-embed
+          if (assetInfo.name && assetInfo.name.endsWith('.otf')) {
+            return 'assets/fonts/Helvetica/OTF/[name][extname]'
+          }
+          if (assetInfo.name && assetInfo.name.endsWith('.ttf')) {
+            return 'assets/fonts/Helvetica/Variable/[name][extname]'
+          }
+          return 'assets/[name][extname]'
+        },
       },
     },
     outDir: 'dist-embed',
     emptyOutDir: true,
+    copyPublicDir: false,
   },
   resolve: {
     alias: {

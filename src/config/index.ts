@@ -1,7 +1,7 @@
-// Application configuration
-// Export your config constants here
+import { CALENDAR_API_BASE_URL } from './env'
 
 export const config = {
-  // Add your config values here
+  apiBaseUrl: CALENDAR_API_BASE_URL,
 }
 
+export * from './env'

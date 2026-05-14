@@ -95,6 +95,47 @@ window.Chatbot.toggle()
 
 The widget automatically initializes when the script loads. The button appears in the bottom-right corner and opens the chat window when clicked.
 
+## Desktop side-by-side layout (minimize main panel)
+
+On viewports **768px and up** (md breakpoint), the chat opens as a **full-height right sidebar** instead of a floating overlay. To make your main content shrink so it sits side-by-side with the chat, use the widget’s body attribute and optional events.
+
+### Body attribute: `data-chat-open`
+
+When the chat is open, the widget sets `data-chat-open="true"` on `<body>`. When the chat is closed, the attribute is removed. Use this in your site’s CSS to reserve space for the sidebar.
+
+**Sidebar width:** The chat panel is `28rem` (448px) wide on desktop. Use the same value in your layout so content and chat align.
+
+**Example – shrink main content when chat is open:**
+
+```css
+/* At the same breakpoint the widget uses for sidebar (768px) */
+@media (min-width: 768px) {
+  body[data-chat-open] main {
+    width: calc(100% - 28rem);
+    max-width: calc(100% - 28rem);
+  }
+}
+```
+
+If your layout uses a flex or grid wrapper, you can instead add `margin-right: 28rem` on the content container when `data-chat-open` is set, or reduce its flex basis.
+
+### Custom events (optional)
+
+The widget dispatches these events on `window` when the chat opens or closes, so you can react in JavaScript (e.g. animate, resize):
+
+- **`chat-widget-open`** – fired when the chat is opened
+- **`chat-widget-close`** – fired when the chat is closed
+
+```javascript
+window.addEventListener('chat-widget-open', () => {
+  console.log('Chat opened')
+})
+
+window.addEventListener('chat-widget-close', () => {
+  console.log('Chat closed')
+})
+```
+
 ## Files
 
 After building, you'll find these files in `dist-embed/`:

@@ -1,0 +1,1 @@
+(function(){"use strict";const t="chat-widget-webform-abandonment";function e(n){typeof window>"u"||window.dispatchEvent(new CustomEvent(t,{detail:n}))}window.ChatWidgetWebFormAbandonmentTrigger={trigger(n="unknown"){window.__CHAT_WIDGET_PENDING_WEBFORM_ABANDON__={source:n,ts:Date.now()},requestAnimationFrame(()=>{requestAnimationFrame(()=>{e({source:n})})})}}})();

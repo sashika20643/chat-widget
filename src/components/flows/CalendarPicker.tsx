@@ -1,184 +1,83 @@
-import { useState } from 'react'
-import { Calendar } from '@/components/ui/shadCN/calendar'
-import { DayButton } from 'react-day-picker'
-import { Button } from '@/components/ui/shadCN/button'
-import { cn } from '@/utils/utils'
+import { useState, useMemo, useEffect } from 'react'
+import { startOfDay, isSameMonth, endOfMonth, addMonths } from 'date-fns'
+import { CalendarGrid } from '@/components/CalendarGrid'
+import { toDateKey, getCalendarStartDate } from '@/utils/calendarGridUtils'
 
 interface CalendarPickerProps {
   onDateSelect: (date: Date) => void
   minDate?: Date
-  availabilityMap?: Map<string, boolean> // Map of date strings to availability (true = available/green, false = limited/yellow)
-}
-
-function CustomDayButton({
-  className,
-  day,
-  modifiers,
-  availabilityMap,
-  ...props
-}: React.ComponentProps<typeof DayButton> & { availabilityMap?: Map<string, boolean> }) {
-  const dayOfWeek = day.date.getDay()
-  // Hide weekends (Saturday = 6, Sunday = 0)
-  if (dayOfWeek === 0 || dayOfWeek === 6) {
-    return null
-  }
-
-  const dayName = day.date.toLocaleDateString('en-US', { weekday: 'short' }).substring(0, 2).toUpperCase()
-  const dayNumber = day.date.getDate()
-  const dateKey = day.date.toISOString().split('T')[0] // YYYY-MM-DD format
-  
-  // Check availability from map
-  const availability = availabilityMap?.get(dateKey)
-  const isAvailable = availability === true
-  const showDot = !modifiers.disabled && availability !== undefined
-  
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      data-day={day.date.toLocaleDateString()}
-      data-selected-single={
-        modifiers.selected &&
-        !modifiers.range_start &&
-        !modifiers.range_end &&
-        !modifiers.range_middle
-      }
-      data-range-start={modifiers.range_start}
-      data-range-end={modifiers.range_end}
-      data-range-middle={modifiers.range_middle}
-      className={cn(
-        "h-[--cell-size] w-[--cell-size] min-h-[--cell-size] min-w-[--cell-size] max-h-[--cell-size] max-w-[--cell-size]",
-        "border border-[hsl(var(--tertiary))]/30 rounded-md p-1 sm:p-1.5",
-        "flex flex-col items-start justify-between relative",
-        "data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground",
-        "data-[range-middle=true]:bg-accent data-[range-middle=true]:text-accent-foreground",
-        "data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground",
-        "data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground",
-        "hover:bg-[hsl(var(--gray-100))] disabled:opacity-50 disabled:cursor-not-allowed",
-        className
-      )}
-      {...props}
-    >
-      {/* Top row: Day name (left) and Day number (right) */}
-      <div className="flex items-start justify-between w-full -mt-0.5 text-[9px] sm:text-[10px]">
-        <span className=" font-medium uppercase leading-none">
-          {dayName}
-        </span>
-        <span className=" font-semibold leading-none">
-          {dayNumber}
-        </span>
-      </div>
-      
-      {/* Bottom left: Availability dot */}
-      {showDot && (
-        <div className={cn(
-          "absolute bottom-0.5 left-0.5 sm:bottom-1 sm:left-1 w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full",
-          isAvailable ? "bg-[hsl(var(--success))]" : "bg-[hsl(var(--warning))]"
-        )} />
-      )}
-    </Button>
-  )
+  availabilityMap?: Map<string, boolean>
 }
 
 function CalendarPicker({ onDateSelect, minDate, availabilityMap }: CalendarPickerProps) {
+  const startDate = minDate ?? getCalendarStartDate()
+  const firstAvailableMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1)
+
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
+  const [currentMonth, setCurrentMonth] = useState(() => firstAvailableMonth)
+
   const today = new Date()
-  // Find the next weekday if today is a weekend
-  const todayDayOfWeek = today.getDay()
-  const startDate = minDate || (todayDayOfWeek === 0 || todayDayOfWeek === 6 
-    ? (() => {
-        const nextWeekday = new Date(today)
-        // If Sunday (0), add 1 day to get Monday
-        // If Saturday (6), add 2 days to get Monday
-        nextWeekday.setDate(today.getDate() + (todayDayOfWeek === 0 ? 1 : 2))
-        return nextWeekday
-      })()
-    : today)
 
-  // Create dummy availability map if not provided
-  const defaultAvailabilityMap = new Map<string, boolean>()
-  if (!availabilityMap) {
-    const currentYear = today.getFullYear()
-    
-    // Generate availability for current year (remaining days)
-    const endOfYear = new Date(currentYear, 11, 31)
-    for (let date = new Date(today); date <= endOfYear; date.setDate(date.getDate() + 1)) {
-      const dateKey = date.toISOString().split('T')[0]
-      const daysFromToday = Math.floor((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-      
-      // Make some dates unavailable (yellow) - every 3rd day is limited
-      if (daysFromToday % 3 === 0) {
-        defaultAvailabilityMap.set(dateKey, false)
-      } else {
-        defaultAvailabilityMap.set(dateKey, true)
+  useEffect(() => {
+    const minDay = startOfDay(startDate)
+    if (endOfMonth(currentMonth) < minDay) {
+      setCurrentMonth((m) => addMonths(m, 1))
+    }
+  }, [currentMonth, startDate])
+
+  const defaultAvailabilityMap = useMemo(() => {
+    const map = new Map<string, boolean>()
+    const now = new Date()
+    const currentYear = now.getFullYear()
+
+    const addYear = (y: number) => {
+      const start = new Date(y, 0, 1)
+      const end = new Date(y, 11, 31)
+      for (const d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        const key = toDateKey(d)
+        const daysFromToday = Math.floor(
+          (d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+        )
+        map.set(key, daysFromToday % 3 !== 0)
       }
     }
-    
-    // Generate availability for next 2 years
-    for (let yearOffset = 1; yearOffset <= 2; yearOffset++) {
-      const targetYear = currentYear + yearOffset
-      const startOfYear = new Date(targetYear, 0, 1)
-      const endOfYear = new Date(targetYear, 11, 31)
-      
-      for (let date = new Date(startOfYear); date <= endOfYear; date.setDate(date.getDate() + 1)) {
-        const dateKey = date.toISOString().split('T')[0]
-        const dayOfYear = Math.floor((date.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24))
-        
-        if (dayOfYear % 3 === 0) {
-          defaultAvailabilityMap.set(dateKey, false)
-        } else {
-          defaultAvailabilityMap.set(dateKey, true)
-        }
-      }
-    }
-  }
 
-  const finalAvailabilityMap = availabilityMap || defaultAvailabilityMap
+    addYear(currentYear)
+    addYear(currentYear + 1)
+    addYear(currentYear + 2)
+    return map
+  }, [])
 
-  function handleDateSelect(date: Date | undefined) {
-    if (date) {
-      setSelectedDate(date)
-      onDateSelect(date)
-    }
-  }
-
-  function CustomDayButtonWithAvailability(props: React.ComponentProps<typeof DayButton>) {
-    return <CustomDayButton {...props} availabilityMap={finalAvailabilityMap} />
-  }
-
+  const finalAvailabilityMap = availabilityMap ?? defaultAvailabilityMap
   const currentYear = today.getFullYear()
 
+  function handleDateSelect(date: Date) {
+    setSelectedDate(date)
+    onDateSelect(date)
+  }
+
+  function disabled(date: Date) {
+    const dayOfWeek = date.getDay()
+    // Disable Sunday (0) and Monday (1) so only Tuesday–Saturday are pickable.
+    return (
+      !isSameMonth(date, currentMonth) ||
+      startOfDay(date) < startOfDay(startDate) ||
+      dayOfWeek === 0 ||
+      dayOfWeek === 1
+    )
+  }
+
   return (
-    <div className="bg-background border border-[hsl(var(--tertiary))] rounded-lg p-1 sm:p-4 lg:p-6 w-[calc(100%-.5rem)] lg:w-[calc(100%)] md:w-[calc(100%)]">
-      <Calendar
-        mode="single"
+    <div className="p-1 sm:p-4 lg:p-6 w-[calc(100%-.5rem)] lg:w-full md:w-full">
+      <CalendarGrid
+        month={currentMonth}
+        onMonthChange={setCurrentMonth}
         selected={selectedDate}
         onSelect={handleDateSelect}
-        disabled={(date) => {
-          const dayOfWeek = date.getDay()
-          // Disable weekends (Saturday = 6, Sunday = 0) and past dates
-          return date < startDate || dayOfWeek === 0 || dayOfWeek === 6
-        }}
-        className="[--cell-size:2.5rem] sm:[--cell-size:3rem] lg:[--cell-size:3.5rem] [&_.rdp-week]:gap-1 [&_.rdp-day[data-day='0']]:hidden [&_.rdp-day[data-day='6']]:hidden [&_.rdp-weekday:first-child]:hidden [&_.rdp-weekday:last-child]:hidden [&_.rdp-day]:flex-1 [&_.rdp-day]:overflow-hidden [&_td[data-day]:has([data-day='0'])]:hidden [&_td[data-day]:has([data-day='6'])]:hidden [&_.rdp-today]:overflow-hidden [&_.rdp-today_button]:overflow-hidden"
-        classNames={{
-          weekday: "flex-1",
-       day: "flex-1 overflow-hidden [&[data-day='0']]:hidden [&[data-day='6']]:hidden",
-          today: "overflow-hidden"
-
-        }}
-          fromYear={currentYear}
-          toYear={currentYear + 2}
-          components={{
-            DayButton: CustomDayButtonWithAvailability,
-            Day: ({ day, ...props }) => {
-              const dayOfWeek = day.date.getDay()
-              // Hide weekend cells completely by returning a hidden td
-              if (dayOfWeek === 0 || dayOfWeek === 6) {
-                return <td {...props} style={{ display: 'none' }} />
-              }
-              return <td {...props} />
-            }
-          }}
+        disabled={disabled}
+        availabilityMap={finalAvailabilityMap}
+        fromYear={currentYear}
+        toYear={currentYear + 2}
       />
     </div>
   )

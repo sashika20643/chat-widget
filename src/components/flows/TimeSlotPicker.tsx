@@ -1,18 +1,28 @@
 import { Button } from '@/components/ui/shadCN/button'
+import { ChatBubble } from '@/components/ui/chat-bubble'
+import { TextContent } from '@/components/TextContent'
 import { cn } from '@/utils/utils'
+
+function formatSelectedDate(date: Date): string {
+  return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+}
 
 interface TimeSlotPickerProps {
   slots: string[]
   pickedSlots?: string[]
   selectedTime?: string
+  selectedDate: Date
   onTimeSelect: (time: string) => void
 }
 
-function TimeSlotPicker({ slots, pickedSlots = [], selectedTime, onTimeSelect }: TimeSlotPickerProps) {
+function TimeSlotPicker({ slots, pickedSlots = [], selectedTime, selectedDate, onTimeSelect }: TimeSlotPickerProps) {
+  const dateLabel = formatSelectedDate(selectedDate)
   return (
-    <div className="bg-background border border-[hsl(var(--tertiary))] rounded-lg p-4">
-      <h3 className="font-semibold text-sm mb-3">Select a time slot</h3>
-      <div className="grid grid-cols-3 gap-2">
+    <ChatBubble variant="assistant" className="p-4 lg:p-6">
+      <TextContent variant="textMedium" className="mb-5 block">
+        Sure, {dateLabel} works very well, we'll have plenty of time for you then! What time suits you best?
+      </TextContent>
+      <div className="grid grid-cols-4 gap-x-0 lg:gap-x-0 gap-y-3 lg:gap-y-5">
         {slots.map((slot) => {
           const isSelected = selectedTime === slot
           const isPicked = pickedSlots.includes(slot)
@@ -20,14 +30,15 @@ function TimeSlotPicker({ slots, pickedSlots = [], selectedTime, onTimeSelect }:
           return (
             <Button
               key={slot}
-              variant={isSelected ? 'default' : 'outline'}
+              variant={isSelected ? 'default' : isPicked ? 'outline' : 'outline-black'}
               size="sm"
               onClick={() => !isPicked && onTimeSelect(slot)}
               disabled={isPicked}
               className={cn(
-                "text-xs",
-                !isPicked && " hover:bg-primary text-foreground border-primary",
-                isPicked && "time-slot-picked bg-secondary" 
+                "text-xs lg:text-lg rounded-full w-fit min-w-0 lg:px-3 lg:py-4 px-3.5 py-3",
+                !isPicked && !isSelected && "bg-[hsl(var(--primary))] text-primary-foreground hover:bg-[hsl(var(--primary))]/90",
+                isSelected && "bg-primary text-primary-foreground",
+                isPicked && "time-slot-picked bg-secondary text-secondary-foreground" 
               )}
             >
               {slot}
@@ -35,7 +46,7 @@ function TimeSlotPicker({ slots, pickedSlots = [], selectedTime, onTimeSelect }:
           )
         })}
       </div>
-    </div>
+    </ChatBubble>
   )
 }
 

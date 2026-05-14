@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:embed": "tsc -b && vite build --config vite.embed.config.ts",
+    "build:embed": "tsc -b && vite build --config vite.embed.config.ts && vite build --config vite.trigger-inactivity.config.ts && vite build --config vite.trigger-product-dwell.config.ts && vite build --config vite.trigger-webform-abandonment.config.ts && vite build --config vite.trigger-scroll-indecision.config.ts && vite build --config vite.trigger-thank-you.config.ts",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@logto/react": "^4.0.14",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-scroll-area": "^1.2.10",
@@ -29,6 +30,7 @@
     "react-dom": "^19.2.0",
     "react-markdown": "^10.1.0",
     "react-redux": "^9.2.0",
+    "react-router-dom": "^7.15.0",
     "remark-gfm": "^4.0.1",
     "shiki": "^1.29.2",
     "sonner": "^2.0.7",

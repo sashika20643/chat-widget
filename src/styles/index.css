@@ -2,22 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Helvetica Neue";
+  src: url("../../assets/fonts/HelveticaNeue-Medium.woff2") format("woff2"),
+       url("../../assets/fonts/HelveticaNeue-Medium.woff") format("woff"),
+       url("../../assets/fonts/HelveticaNeue-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
 @layer base {
+  *, html, body {
+    font-family: "Helvetica Neue", "Helvetica Now", Helvetica, Arial, sans-serif;
+    font-weight: 500;
+  }
   :root {
-    /* Base colors - Main background and text */
+    /* Color tokens (use in CSS; Tailwind uses semantic vars below) */
+    --color-primary: #439143;
+    --color-accent: #ef791e;
+    --color-surface: #ffffff;
+    --color-border-strong: #1d1d1b;
+    --color-text-muted: #b3b3b3;
+    --border-icon: 0.85pt; /* Icon border width (#1d1d1b) – not used on IconButton */
+
+    /* Semantic colors (HSL for Tailwind hsl(var(--…))) */
     --background: 0 0% 100%; /* Main page background (white in light mode) */
-    --foreground: 0 0% 0%; /* Main text color (black in light mode) */
+    --foreground: 0 0% 13.3%; /* Main text color (#222222) */
     
     /* Card colors - Used for card components */
     --card: 0 0% 100%; /* Card background */
-    --card-foreground: 0 0% 0%; /* Card text color */
+    --card-foreground: 0 0% 13.3%; /* Card text color (#222222) */
     
     /* Popover colors - Used for popover/dropdown components */
     --popover: 0 0% 100%; /* Popover background */
-    --popover-foreground: 0 0% 0%; /* Popover text color */
+    --popover-foreground: 0 0% 13.3%; /* Popover text color (#222222) */
     
     /* Primary colors - Main brand/accent color */
-    --primary: 116 35% 73%; /* Primary button/action color (light green) */
+    --primary: 116 32% 71%; /* Primary button/action color (light green) */
     --primary-foreground: 0 0% 0%; /* Text on primary background */
     
     /* Secondary colors - Secondary actions */
@@ -37,9 +58,9 @@
     --destructive-foreground: 0 0% 98%; /* Text on destructive background */
     
     /* Border and input colors */
-    --border: 116 15% 85%; /* Border color (light gray-green) */
-    --input: 116 15% 85%; /* Input border color */
-    --ring: 116 35% 73%; /* Focus ring color (matches primary) */
+    --border: 60 6% 11%; /* Border color (#1d1d1b) */
+    --input: 60 6% 11%; /* Input border color (#1d1d1b) */
+    --ring: 116 32% 71%; /* Focus ring color (matches primary) */
     
     /* Border radius */
     --radius: 0.5rem; /* Default border radius */
@@ -68,18 +89,18 @@
   .dark {
     /* Base colors - Dark mode variants */
     --background: 0 0% 0%; /* Main page background (black in dark mode) */
-    --foreground: 116 35% 73%; /* Main text color (light green in dark mode) */
+    --foreground: 116 32% 71%; /* Main text color (light green in dark mode) */
     
     /* Card colors - Dark mode variants */
     --card: 0 0% 5%; /* Card background (very dark gray) */
-    --card-foreground: 116 35% 73%; /* Card text color */
+    --card-foreground: 116 32% 71%; /* Card text color */
     
     /* Popover colors - Dark mode variants */
     --popover: 0 0% 5%; /* Popover background */
-    --popover-foreground: 116 35% 73%; /* Popover text color */
+    --popover-foreground: 116 32% 71%; /* Popover text color */
     
     /* Primary colors - Dark mode variants */
-    --primary: 116 35% 73%; /* Primary color (same as light mode) */
+    --primary: 116 32% 71%; /* Primary color (same as light mode) */
     --primary-foreground: 0 0% 0%; /* Text on primary background */
     
     /* Secondary colors - Dark mode variants */
@@ -99,9 +120,9 @@
     --destructive-foreground: 0 0% 98%; /* Text on destructive background */
     
     /* Border and input colors - Dark mode variants */
-    --border: 0 0% 20%; /* Border color (dark gray) */
-    --input: 0 0% 20%; /* Input border color */
-    --ring: 116 35% 73%; /* Focus ring color */
+    --border: 60 6% 11%; /* Border color (#1d1d1b) */
+    --input: 60 6% 11%; /* Input border color (#1d1d1b) */
+    --ring: 116 32% 71%; /* Focus ring color */
     
     /* Tertiary colors - Dark mode variants (inverted from light mode) */
     --tertiary: 0 0% 100%; /* Tertiary background (white in dark mode) */
@@ -131,22 +152,90 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    font-family: "Helvetica Neue", "Helvetica Now", Helvetica, Arial, sans-serif;
+    font-weight: 500; /* Medium */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer components {
+  /* Chat bubble with tail for assistant messages */
+  .chat-bubble-assistant {
+    position: relative;
+    padding: 20px;
+    margin-left: 4px;
+    background-color: var(--color-surface) !important;
+    border: solid 0.85px #1d1d1b;
+    border-radius: 31px;
+    overflow: visible;
+  }
+
+  .chat-bubble-assistant .tail {
+    position: absolute;
+    bottom: -24px;
+    left: 15px;
+    width: 20px;
+    height: 30px;
+    background-image: url("../assets/icons/Chatbubble Pointer.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+  }
+
+  .chat-bubble-assistant .tail2 {
+    display: none;
+  }
+
+  /* Chat bubble with tail for user messages (same as assistant: white bg, black text) */
+  .chat-bubble-user {
+    position: relative;
+    margin-right: 4px;
+    padding: 20px;
+    background-color: var(--color-surface) !important;
+    color: var(--color-border-strong);
+    border: solid 0.85px #1d1d1b;
+    border-radius: 1.5em;
+    overflow: visible;
+  }
+
+  .chat-bubble-user .tail {
+    position: absolute;
+    bottom: -24px;
+    right: 15px;
+    width: 20px;
+    height: 30px;
+    background-image: url("../assets/icons/Chatbubble Pointer.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    transform: scaleX(-1);
+  }
+
+  .chat-bubble-user .tail2 {
+    display: none;
+  }
+  
   /* Time slot picker - Disabled/picked state styling */
   .time-slot-picked {
     background-color: hsl(var(--gray-300)); /* Light gray background for unavailable slots */
     color: hsl(var(--gray-600)); /* Medium gray text */
-    border-color: hsl(var(--gray-400)); /* Medium-light gray border */
+    border-color: hsl(var(--border)); /* Standard border color */
     cursor: not-allowed;
   }
   
   /* Time slot picker - Hover state on picked slots */
   .time-slot-picked:hover {
-    background-color: hsl(var(--warning)); /* Orange warning color on hover */
-    color: hsl(var(--warning-foreground)); /* Black text on warning background */
-    border-color: hsl(var(--warning)); /* Orange border */
+    background-color: var(--color-accent);
+    color: var(--color-surface);
+    border-color: hsl(var(--border));
+  }
+}
+
+/* Host page: shrink main content when chat is open on desktop (side-by-side).
+   For screens wider than 1600px, the chat widget takes 25% width (25vw),
+   so the main content shrinks to the remaining 75%. */
+@media (min-width: 1600px) {
+  body[data-chat-open] .chat-widget-main-shrink {
+    width: calc(100% - 25vw);
+    max-width: calc(100% - 25vw);
   }
 }

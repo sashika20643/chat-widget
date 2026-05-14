@@ -1,5 +1,4 @@
 # React + TypeScript + Tailwind Coding Guidelines
-
 ## Code Style & Structure
 - Write **concise, technical TypeScript code**.  
 - Use **functional and declarative programming patterns**; avoid classes.  
