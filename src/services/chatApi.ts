@@ -1,16 +1,9 @@
+import { CHAT_API_BASE_URL, CHAT_STREAM_API_URL } from '@/config/env'
 import type { ScenarioResponse, MessageContent, SubscribeSubAction } from '@/types/chat'
 import {
   createInitialMobelaboWizardState,
   createInitialSearchServiceWizardState,
 } from '@/types/chat'
-
-const CHAT_API_BASE_URL =
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_CHAT_API_BASE_URL) ||
-  'https://getagent-chat-agent.ceilu9.easypanel.host'
-
-const CHAT_STREAM_API_URL =
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_CHAT_STREAM_API_URL) ||
-  'https://getagent-chat-agent.ceilu9.easypanel.host/api/chat/stream'
 
 /** Assistant copy for newsletter signup; replaces API response text when action is newsletter. */
 export const NEWSLETTER_ASSISTANT_MESSAGE = `You can join our newsletter below to

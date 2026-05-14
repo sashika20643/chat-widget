@@ -1,11 +1,7 @@
-const OBJECTS_API_URL =
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_OBJECTS_API_URL) ||
-  'https://getbutik-base-getbutik-db-service.ceilu9.easypanel.host/api/chat_bot/objects'
+import { IMAGE_BASE_URL, OBJECTS_API_URL } from '@/config/env'
 
 /** Base URL for resolving relative image_url from the objects API */
-export const IMAGE_BASE_URL =
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_IMAGE_BASE_URL) ||
-  'https://getbutik-base-getbutik-db-service.ceilu9.easypanel.host'
+export { IMAGE_BASE_URL }
 
 /** Resolve image URL: use as-is if absolute, otherwise prepend IMAGE_BASE_URL */
 export function resolveImageUrl(url: string | null | undefined): string | null {

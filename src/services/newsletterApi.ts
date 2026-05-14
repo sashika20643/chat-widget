@@ -1,4 +1,6 @@
+import { getNewsletterLegacyApiUrl } from '@/config/env'
 import { DEFAULT_FCA_SHOP_ID, NewsletterSubCategory } from '@/constants/fcaShops'
+import { extractErrorMessage, readResponseJson } from '@/lib/apiErrorBody'
 import { IMAGE_BASE_URL } from '@/services/chatObjectsApi'
 import { getStoredCustomerId, getStoredSubscriptionShopId } from '@/utils/chatWidgetCustomerId'
 
@@ -20,10 +22,7 @@ export async function subscribeToNewsletter(email: string): Promise<void> {
     subCategories: [NewsletterSubCategory.Bogen33],
   })
 
-  const legacyUrl =
-    typeof import.meta !== 'undefined' && import.meta.env?.VITE_NEWSLETTER_API_URL
-      ? String(import.meta.env.VITE_NEWSLETTER_API_URL).trim()
-      : ''
+  const legacyUrl = getNewsletterLegacyApiUrl()
 
   if (legacyUrl) {
     const res = await fetch(legacyUrl, {
@@ -75,22 +74,6 @@ export function isNewsletterCustomerNotFoundError(err: unknown): boolean {
   return name === 'NewsletterCustomerNotFoundError'
 }
 
-function extractErrorMessage(data: unknown, status: number, fallback: string): string {
-  if (data && typeof data === 'object') {
-    const o = data as Record<string, unknown>
-    const msg = o.message ?? o.error ?? o.detail
-    if (typeof msg === 'string' && msg.trim()) return msg.trim()
-    if (Array.isArray(o.errors) && o.errors.length > 0) {
-      const first = o.errors[0]
-      if (typeof first === 'string') return first
-      if (first && typeof first === 'object' && 'msg' in first && typeof (first as { msg: unknown }).msg === 'string') {
-        return (first as { msg: string }).msg
-      }
-    }
-  }
-  return `${fallback} (${status})`
-}
-
 /**
  * POST `/api/chat_bot/subscription/create` on {@link IMAGE_BASE_URL}.
  * Uses the logged-in customer id from Logto claims stored after sign-in.
@@ -119,12 +102,7 @@ export async function createNewsletterSubscription(
     body: JSON.stringify(body),
   })
 
-  let data: unknown
-  try {
-    data = await res.json()
-  } catch {
-    data = null
-  }
+  const data = await readResponseJson(res)
 
   if (!res.ok) {
     if (res.status === 404) {

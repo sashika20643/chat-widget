@@ -1,6 +1,7 @@
-// Application configuration
-// Export your config values here
+import { CALENDAR_API_BASE_URL } from './env'
 
 export const config = {
-  apiBaseUrl: 'https://getagent-email-agent-server.ceilu9.easypanel.host',
+  apiBaseUrl: CALENDAR_API_BASE_URL,
 }
+
+export * from './env'

@@ -1,3 +1,5 @@
+import { IMGBB_API_KEY } from '@/config/env'
+
 const IMGBB_UPLOAD_URL = 'https://api.imgbb.com/1/upload'
 
 function fileToBase64(file: File): Promise<string> {
@@ -19,10 +21,7 @@ function stripDataUrlPrefix(dataUrl: string): string {
  * Uploads an image to ImgBB and returns the public URL.
  */
 export async function uploadImageToImgBB(file: File): Promise<string> {
-  const apiKey =
-    import.meta.env?.VITE_IMGBB_API_KEY ??
-    // Fallback to user-provided key for this widget.
-    'ea6f97236e17aead3ade5fe286837cfb'
+  const apiKey = IMGBB_API_KEY
 
   if (file.size > 32 * 1024 * 1024) {
     throw new Error('Image exceeds 32MB limit')
